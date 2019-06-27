@@ -1,4 +1,4 @@
-#Model selection in the maximum entropy model based on model complexity measures
+# Model selection in the maximum entropy model based on model complexity measures
 
 This will be our README page, basically the page that will first be seen and contain
 
