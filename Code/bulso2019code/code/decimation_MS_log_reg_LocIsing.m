@@ -29,17 +29,17 @@
 function time = decimation_MS_log_reg_LocIsing(Nx,h,M,theta,vbeta,trial,comparewithL1)
 
 % if you wish to compare with L1
-try cmpL1 = comparewithL1; catch
+try cmpL1 = comparewithL1; catch %Try staement executes statement and then upon error rolls over to catch block
     cmpL1 = false;
 end
 
 % call rng for reproducibility
 rng(trial)
 
-tic
+tic %starts stopwatch
 
 % number of parameters
-Np = Nx + h;
+Np = Nx + h; %number of inputs plus field parameter (0 or 1)
 
 % fraction of active couplings
 vNp_inactive = round(linspace(0,Nx,6));
@@ -268,7 +268,7 @@ for iNp_inactive = 1:numel(vNp_inactive)
     fprintf('Nx = %d, h = %d, s = %2.4f, J = %2.4f and beta = %2.4f \n',Nx,h,sparsity,theta,beta);
     fprintf('-----------------------------------------------------  \n\n');
     
-    time = toc;
+    time = toc; % end stopwatch and record length
     
     save(['Experiments18_decimation/New_Exp1_Nx',num2str(Nx),'_h',num2str(h),'_s',...
         num2str(sparsity),'_J',num2str(theta),'_LocBeta',num2str(beta),'trial',num2str(trial),'.mat']);
