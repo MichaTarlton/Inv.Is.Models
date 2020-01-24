@@ -48,7 +48,7 @@ ForIs.m
 
 T = 1e4; %| Presetting the T.calculation: 3*M(numel(M))
 N = 50;
-jn = 10;
+jn = 10; %| Trials
 
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist

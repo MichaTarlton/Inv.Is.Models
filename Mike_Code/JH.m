@@ -24,7 +24,7 @@ function JHstruct = JH(N,jn,h_on)
 		hsparse = h.*double(rand(1,N)> sparsity);
 		JHstruct(i).Hfield = h;
 		JHstruct(i).Hsparse = hsparse;
-	else
+		else
 		JHstruct(i).Hfield = zeros(1,N);
 		JHstruct(i).Hsparse = zeros(1,N);;
     	end
