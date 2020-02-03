@@ -29,20 +29,21 @@
 function time = decimation_MS_log_reg_LocIsing(Nx,h,M,theta,vbeta,trial,comparewithL1)
 
 % if you wish to compare with L1
-try cmpL1 = comparewithL1; catch
+try cmpL1 = comparewithL1; catch %Try staement executes statement and then upon error rolls over to catch block
     cmpL1 = false;
 end
 
 % call rng for reproducibility
 rng(trial)
 
-tic
+tic %starts stopwatch
 
 % number of parameters
-Np = Nx + h;
+Np = Nx + h; %number of inputs plus field parameter (0 or 1)
 
 % fraction of active couplings
 vNp_inactive = round(linspace(0,Nx,6));
+
 for iNp_inactive = 1:numel(vNp_inactive)
     Np_inactive = vNp_inactive(iNp_inactive);
     sparsity = Np_inactive/Np;
@@ -91,8 +92,7 @@ for iNp_inactive = 1:numel(vNp_inactive)
         BestModel.L1 = zeros(numel(M),Np);LambdaBestL1 = zeros(numel(M),1);
         
         
-        % distribution with abs of couplings distributed between 0.5*theta and
-        % 1.5*theta
+        % distribution with abs of couplings distributed between 0.5*theta and 1.5*theta
         w = theta*(rand(1,Np)+0.5);
         segno = 2*double(rand(1,Np)>.5)-1;
         w = segno.*w;
@@ -106,19 +106,24 @@ for iNp_inactive = 1:numel(vNp_inactive)
             w = w/sqrt(d);
         end
         
-        % ---- # GENERATION OF DATA
-        % NOTICE: here X is not observed with frequency p, but
-        % drawn from a distribution p. APPROXIMATION IN THE
-        % SIMULATIONS!
-        % generate input distribution according to Ising
-        % distribution by means of Monte Carlo
+
+
+
         
-        % generate data in the input layer according to the desired
-        % localisation/ generate more data to avoid many Monte Carlo
+        % ---- # GENERATION OF DATA
+        % NOTICE: here X is not observed with frequency p, but drawn from a distribution p. 
+        % APPROXIMATION IN THE SIMULATIONS!
+        % generate input distribution according to Ising distribution by means of Monte Carlo
+        % generate data in the input layer according to the desired localisation
+        % generate more data to avoid many Monte Carlo
         rep = true;
         XX = Metropolis_Hasting(3*M(numel(M)),Nx,beta*W,beta*H,rep);
         X = ones(M(numel(M)),Nx); Y = ones(M(numel(M)),1);
         door = true;
+
+
+
+
 
         % the rank of the composite matrix has to be full rank
         while rank([X,Y]) ~= Np+1 || door
@@ -167,6 +172,7 @@ for iNp_inactive = 1:numel(vNp_inactive)
             % notice 2) if there is a field you don't need to put this
             % information in the routine since in that case X already contains
             % an additional column
+
             [w_ML,l_ML,posterior,Cost,Best,ibest] = decimation_logistic_Model_Selection(X(sel,:),Y(sel));
             fprintf('Model selection time %4.3f\n',toc)
             
@@ -268,7 +274,7 @@ for iNp_inactive = 1:numel(vNp_inactive)
     fprintf('Nx = %d, h = %d, s = %2.4f, J = %2.4f and beta = %2.4f \n',Nx,h,sparsity,theta,beta);
     fprintf('-----------------------------------------------------  \n\n');
     
-    time = toc;
+    time = toc; % end stopwatch and record length
     
     save(['Experiments18_decimation/New_Exp1_Nx',num2str(Nx),'_h',num2str(h),'_s',...
         num2str(sparsity),'_J',num2str(theta),'_LocBeta',num2str(beta),'trial',num2str(trial),'.mat']);

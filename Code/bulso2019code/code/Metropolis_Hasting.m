@@ -16,8 +16,8 @@ try view = vw; catch
 end
 
 % initial settings
-Nequil = 1e4*N;%that means 1e4 upgrades of the whole system for equilibrium (1e4 swips)
-Int = 10*N; %steps interval between two different measurements (10 swips)
+Nequil = 1e4*N;     %that means 1e4 upgrades of the whole system for equilibrium (1e4 swips)
+Int = 10*N;         %steps interval between two different measurements (10 swips)
 
 Navg = Ndata*Int;
 Energy = zeros(1,Nequil+Navg);
@@ -26,7 +26,7 @@ Energy = zeros(1,Nequil+Navg);
 S = double(rand(1,N) > 0.5);
 if ~representation
     mini = 0; maxi = 1;
-elseif representation
+    elseif representation
     S = 2*S-1;
     mini = -1; maxi = 1;
 end
@@ -45,7 +45,7 @@ l = 0;
 %%%%%%%%%%%%%%%%%%% INITIAL LOOP FOR EQUILIBRIUM %%%%%%%%%%%%%%%%%%%%%%%
 S_eq = zeros(Ndata,N);
 mu_eq = 0;
-for j = 1:Nequil
+ofr j = 1:Nequil
     
     % store last points at intervals of Int
     if j > Nequil-Navg && view
@@ -65,7 +65,7 @@ for j = 1:Nequil
         St(k) = 1-S(k); 
     end
     Et = -0.5*St*J*St' - St*h';   %Energy of the trial configuration
-    DE = Et - E;
+    DE = Et - E;    
     
     if DE<0                        %METROPOLIS ALGORITHM
         S = St;

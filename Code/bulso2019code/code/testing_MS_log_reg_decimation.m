@@ -19,10 +19,9 @@ tipo = 1; % ising, calls function_MS_log_reg_ultimate
 Nx_v = 50;
 
 % field is active? (yes if h = 1, no h = 0)
-h = 0;
+h = 0; %Nicola said that this is meant to stay off, there currently is not an implementation for standing fields
 
-% number of observations: notice that K (for CV with l1) has to be an
-% exact divisor for M (usually I take K = 5)
+% number of observations: notice that K (for CV with l1) has to be an exact divisor for M (usually I take K = 5)
 alpha = [5,50,200];
 M = alpha*Nx_v; % only if Nx_v is scalar
 

@@ -105,8 +105,7 @@ stdErrors = std(Error_trials,[],5);
 Fp = mean(Fp_trials,5);
 Fn = mean(Fn_trials,5);
 
-methods = {"BIC","AIC","MDLl","MDLu","MDLent","MDLcount","L1"};
-i_methods = logical([1,1,0,0,1,0,1]);
+  
 i_methodsLargeM = logical([1,1,0,0,1,0,1]);
 %i_methodsLargeM = logical([0,0,0,0,1,0,0]);
 v_spars = logical([ones(1,5),0]);
