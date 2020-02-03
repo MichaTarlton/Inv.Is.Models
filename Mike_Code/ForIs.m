@@ -1,4 +1,4 @@
-ForIs.m
+%%%ForIs.m
 %% Forward ising
 
 %% Creating forward Ising solution from scratch
@@ -45,6 +45,7 @@ ForIs.m
 % 			jn is the number of coupling matrixes we want to create, 
 %			hon is whether or not we want to create exernal field
 % Possibly add option for distribution chosen
+clear all;
 
 T = 1e4; %| Presetting the T.calculation: 3*M(numel(M))
 N = 50;
@@ -60,6 +61,8 @@ h_on = 0;
 % Sparsity setting is set from inside JH fnc currently
 
 JHstruct = JH(N,jn,h_on);
+
+JHsanity = JHsanity(N,jn,h_on)
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field
