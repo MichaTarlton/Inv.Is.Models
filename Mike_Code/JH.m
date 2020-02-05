@@ -31,8 +31,12 @@ function JHstruct = JH(N,jn,h_on)
 
 	JHstruct(i).Jgaus = R3;
 	JHstruct(i).Jsparse =  R3s;
-	end
+	
+disp(['End J run ',num2str(i)]) % Current sate output
 
-	save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'.mat'],'JHstruct');
-    
+
+end
+
+	time = datestr(now,'HHMM-ddmmmyy');
+    save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'_',time,'.mat'],'JHstruct');
 end

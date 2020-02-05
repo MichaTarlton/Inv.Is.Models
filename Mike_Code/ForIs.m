@@ -62,7 +62,7 @@ h_on = 0;
 
 JHstruct = JH(N,jn,h_on);
 
-JHsanity = JHsanity(N,jn,h_on)
+%JHstruct = JHs(N,jn,h_on); %Turn off if runing the normal one
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field

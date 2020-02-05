@@ -157,7 +157,7 @@ for i = 1:jn
 	Sstruct(i).mequil = mean(S_eq);
 	Sstruct(i).Cequil = S_eq'*S_eq/T;
 
-	disp(['End J run ',num2str(i)])
+	disp(['End S run ',num2str(i)])
 end
 
 time = datestr(now,'HHMM-ddmmmyy')
