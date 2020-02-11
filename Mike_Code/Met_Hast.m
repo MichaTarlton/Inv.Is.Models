@@ -21,7 +21,7 @@
 %
 %
 
-function Sstruct = Met_Hast(T,N,jn,JHstruct)
+function Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity)
 
 	
 % initial settings, copied wholesale from Nicola
@@ -161,6 +161,6 @@ for i = 1:jn
 end
 
 time = datestr(now,'HHMM-ddmmmyy')
-save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',time,'.mat'],'Sstruct');
+save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
 
 end

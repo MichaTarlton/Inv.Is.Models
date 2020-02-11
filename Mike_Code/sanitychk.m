@@ -12,25 +12,41 @@
 
 
 
-function JHsanity = JHsanity(N,jn,h_on)
-   %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
-	for i = 1:jn
-	R3 = zeros(N,N);
-        
-    	if h_on == 1
-		h = ones(1,N);
-		JHstruct(i).Hfield = h;
-		JHstruct(i).Hsparse = h;
-		else
-		JHstruct(i).Hfield = zeros(1,N);
-		JHstruct(i).Hsparse = zeros(1,N);;
+function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity)
+   sanity = struct('th',{},'tchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
+   for i = 1:jn
+    	h = JHstruct(i).Hsparse;
+    	mi = Sstruct(i).mfinal;
+    	sisj = Sstruct(i).Cfinal;
+    	
+        tchk = tanh(h) - mi; 
+
+        mimj = mi'*mi;
+    	chi = sisj - mimj;
+    	mchi = mean(chi,'all');
+
+        if abs(mean(tchk)) < 0.01
+            saneh = 1;
+        else
+            saneh = 0;
+        end
+
+    	if abs(mchi) < 0.01
+    		sanechi = 1;
+    	else
+    		sanechi = 0;
     	end
 
-	JHstruct(i).Jgaus = R3;
-	JHstruct(i).Jsparse =  R3;
-	end
+    	sanity(i).th = tanh(h);
+        sanity(i).tchk = tchk;
+    	sanity(i).mimj = mimj;
+    	sanity(i).chi = chi;
+    	sanity(i).mchi  = mchi;
+        sanity(i).saneh = saneh;
+    	sanity(i).sanechi = sanechi;
 
-	save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'.mat'],'JHstruct');
-    
+    end
+time = datestr(now,'HHMM-ddmmmyy')
+save(['sanity_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+%%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end

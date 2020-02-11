@@ -47,29 +47,34 @@
 % Possibly add option for distribution chosen
 clear all;
 
-T = 1e4; %| Presetting the T.calculation: 3*M(numel(M))
+T = 1e6; %| Presetting the T.calculation: 3*M(numel(M))
 N = 50;
 jn = 10; %| Trials
+sparsity = 0.1;
 
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist
 
 %% h field genereation
-h_on = 0;
+h_on = 1;
 
 %% Decimation algo, decimate random connections in coupling matrix
 % Sparsity setting is set from inside JH fnc currently
 
-JHstruct = JH(N,jn,h_on);
+%JHstruct = JH(N,jn,h_on,sparsity);
 
-%JHstruct = JHs(N,jn,h_on); %Turn off if runing the normal one
+JHstruct = JHs(N,jn,h_on,sparsity); %Turn off if runing the normal one
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 
-Sstruct = Met_Hast(T,N,jn,JHstruct);
+Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity);
+
+%%% Part ??? SANITY CHECK
+
+sanity = sanitychk(jn,Sstruct,JHstruct,sparsity);
 
 
 %%%Part 3 (This is actuall part inference)
