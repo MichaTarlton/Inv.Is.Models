@@ -21,7 +21,7 @@
 %
 %
 
-function Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity)
+function Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time)
 
 	
 % initial settings, copied wholesale from Nicola
@@ -157,10 +157,11 @@ for i = 1:jn
 	Sstruct(i).mequil = mean(S_eq);
 	Sstruct(i).Cequil = S_eq'*S_eq/T;
 
+	save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
 	disp(['End S run ',num2str(i)])
 end
 
-time = datestr(now,'HHMM-ddmmmyy')
-save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
+
+%%save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
 
 end

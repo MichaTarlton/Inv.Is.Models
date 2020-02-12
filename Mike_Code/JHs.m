@@ -12,7 +12,7 @@
 
 
 
-function JHstruct = JHs(N,jn,h_on,sparsity)
+function JHstruct = JHs(N,jn,h_on,sparsity,time)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 
@@ -37,9 +37,11 @@ function JHstruct = JHs(N,jn,h_on,sparsity)
 
 	JHstruct(i).Jgaus = R3;
 	JHstruct(i).Jsparse =  R3;
+	save(['JHsanity_N',num2str(N),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');
+	disp(['End J run ',num2str(i)]) % Current sate output
 	end
 
-	time = datestr(now,'HHMM-ddmmmyy');
-    save(['JHsanity_N',num2str(N),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');
+	
+    %%save(['JHsanity_N',num2str(N),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');
     
 end

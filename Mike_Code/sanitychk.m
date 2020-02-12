@@ -12,7 +12,7 @@
 
 
 
-function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity)
+function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time)
    sanity = struct('th',{},'tchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
    for i = 1:jn
     	h = JHstruct(i).Hsparse;
@@ -46,7 +46,7 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity)
     	sanity(i).sanechi = sanechi;
 
     end
-time = datestr(now,'HHMM-ddmmmyy')
+
 save(['sanity_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end

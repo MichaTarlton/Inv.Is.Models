@@ -52,6 +52,8 @@ N = 50;
 jn = 10; %| Trials
 sparsity = 0.1;
 
+time = datestr(now,'HHMM-ddmmmyy');
+
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist
 
@@ -63,18 +65,18 @@ h_on = 1;
 
 %JHstruct = JH(N,jn,h_on,sparsity);
 
-JHstruct = JHs(N,jn,h_on,sparsity); %Turn off if runing the normal one
+JHstruct = JHs(N,jn,h_on,sparsity,time); %Turn off if runing the normal one
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 
-Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity);
+Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time);
 
 %%% Part ??? SANITY CHECK
 
-sanity = sanitychk(jn,Sstruct,JHstruct,sparsity);
+sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time);
 
 
 %%%Part 3 (This is actuall part inference)
