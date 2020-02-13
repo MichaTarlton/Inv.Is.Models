@@ -1,4 +1,4 @@
-%%%sanitychk.m
+%%%sanitychkdimer.m
 
 %% Do sanity check, create clean inputs as defined by Yasser:
 				% `Your code should get connectivity matrix J and external field vector h. 
@@ -12,8 +12,8 @@
 
 
 
-function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
-   sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
+function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
+   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
    for i = 1:jn
     	h = JHstruct(i).Hsparse;
     	mi = Sstruct(i).mfinal;
@@ -38,17 +38,17 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
     		sanechi = 0;
     	end
 
-    	sanity(i).th = tanh(h);
-        sanity(i).tchk = tchk;
-        sanity(i).mtchk = mtchk;
-    	sanity(i).mimj = mimj;
-    	sanity(i).chi = chi;
-    	sanity(i).mchi  = mchi;
-        sanity(i).saneh = saneh;
-    	sanity(i).sanechi = sanechi;
+    	sanitydimer(i).th = tanh(h);
+        sanitydimer(i).tchk = tchk;
+        sanitydimer(i).mtchk = mtchk;
+    	sanitydimer(i).mimj = mimj;
+    	sanitydimer(i).chi = chi;
+    	sanitydimer(i).mchi  = mchi;
+        sanitydimer(i).saneh = saneh;
+    	sanitydimer(i).sanechi = sanechi;
 
     end
 
-save(['sanityDimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
-%%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+save(['sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
+%%save(['sanitydimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
 end

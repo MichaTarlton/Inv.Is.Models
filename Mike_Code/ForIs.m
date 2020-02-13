@@ -47,10 +47,10 @@
 % Possibly add option for distribution chosen
 clear all;
 
-T = 1e6; %| Presetting the T.calculation: 3*M(numel(M))
+T = 1e5; %| Presetting the T.calculation: 3*M(numel(M))
 N = 50;
 jn = 10; %| Trials
-sparsity = 0.1;
+sparsity = 0;
 
 time = datestr(now,'HHMM-ddmmmyy');
 
@@ -65,7 +65,9 @@ h_on = 1;
 
 %JHstruct = JH(N,jn,h_on,sparsity);
 
-JHstruct = JHs(N,jn,h_on,sparsity,time); %Turn off if runing the normal one
+JHstruct = JHs(N,jn,h_on,sparsity,time,T); %Turn off if runing the normal one
+JHDstruct = JD(N,jn,h_on,sparsity,time,T); %for dimers
+
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field
@@ -73,11 +75,34 @@ JHstruct = JHs(N,jn,h_on,sparsity,time); %Turn off if runing the normal one
 
 
 Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time);
-
+SstructDimer = Met_Hast_D(T,N,jn,JHDstruct,sparsity,time);
 %%% Part ??? SANITY CHECK
 
-sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time);
+sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T);
+sanitydimer = sanitychkdimer(jn,SstructDimer,JHDstruct,sparsity,time,T);
 
+%Plot
+figure
+scatter(sort([Sstruct.mfinal]),sort([SstructDimer.mfinal]))
+hold on 
+title({'Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
+
+figure
+scatter(sort([sanity.tchk]),sort([sanitydimer.tchk]))
+hold on 
+title({'Magnetization Check: th(h) - mi',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
+
+
+figure
+scatter(sort(mean([sanity.chi])),sort(mean([sanitydimer.chi])))
+hold on 
+title({'Correlation Check: chi = sisj - mimj',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat

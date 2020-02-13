@@ -12,36 +12,25 @@
 
 
 
-function JHstruct = JHs(N,jn,h_on,sparsity,time,T)
+function JHsanity = JHsanity(N,jn,h_on)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
-
- 		for i = 1:jn
+	for i = 1:jn
 	R3 = zeros(N,N);
         
     	if h_on == 1
-		%h = ones(1,N);
-		%JHstruct(i).Hfield = h;
-		%JHstruct(i).Hsparse = h;
-		%else
-		%JHstruct(i).Hfield = zeros(1,N);
-		%JHstruct(i).Hsparse = zeros(1,N);
-    	%end
-
-    	%if i > 1 
-    		h = randn(1,N);
-			hsparse = h.*double(rand(1,N)> sparsity);
-			JHstruct(i).Hfield = h;
-			JHstruct(i).Hsparse = hsparse;
-		end
+		h = ones(1,N);
+		JHstruct(i).Hfield = h;
+		JHstruct(i).Hsparse = h;
+		else
+		JHstruct(i).Hfield = zeros(1,N);
+		JHstruct(i).Hsparse = zeros(1,N);;
+    	end
 
 	JHstruct(i).Jgaus = R3;
 	JHstruct(i).Jsparse =  R3;
-	save(['JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');
-	disp(['End J run ',num2str(i)]) % Current sate output
 	end
 
-	
-    %%save(['JHsanity_N',num2str(N),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');
+	save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'.mat'],'JHstruct');
     
 end
