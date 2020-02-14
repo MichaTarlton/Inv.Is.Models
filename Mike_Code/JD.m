@@ -1,6 +1,7 @@
 %% J matrix for gas of dimers
 
-function JHstruct = JD(N,jn,h_on,sparsity,time)
+function JHstruct = JD(N,jn,h_on,sparsity,time,T)
+
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
@@ -36,11 +37,13 @@ function JHstruct = JD(N,jn,h_on,sparsity,time)
     %R3s = R2s + triu(R2s)';			% decimates random values of vector of connection values, not exactly certain how yet. Not sure why using randperm
         
     	if h_on == 1
+
 		% h = randn(1,N);
 		% hsparse = h.*double(rand(1,N)> sparsity);
 		% JHstruct(i).Hfield = h;
 		% JHstruct(i).Hsparse = hsparse;
 		% else
+
 		JHstruct(i).Hfield = zeros(1,N);
 		JHstruct(i).Hsparse = zeros(1,N);
     	end
@@ -48,7 +51,9 @@ function JHstruct = JD(N,jn,h_on,sparsity,time)
 	JHstruct(i).Jgaus = R3;
 	JHstruct(i).Jsparse =  R3;
 
-save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');	
+
+save(['JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');	
+
 disp(['End J run ',num2str(i)]) % Current sate output
 
 
