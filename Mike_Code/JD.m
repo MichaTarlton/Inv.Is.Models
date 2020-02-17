@@ -10,7 +10,7 @@ function JHstruct = JD(N,jn,h_on,sparsity,time,T)
 		R = eye(N).*double(normrnd(0,1/N,[N,N]));
 		R = R/sqrt(N/2); 
 		R2 = R(:,randperm(N));
-		R3 = triu(R2);
+		R3 = triu(R2)+triu(R2)';
 
 
 
