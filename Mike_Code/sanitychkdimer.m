@@ -13,18 +13,41 @@
 
 
 function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
+   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'saneh',{},'mimj',{},'chi',{},'mchi',{},'sanechi',{},
+                        'Jmk',{},'mk',{},'mfchi',{},'mfmchi',{},
+                        'mfaCij',{},'mfbCij',{}) 
+                %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
    for i = 1:jn
-    	h = JHstruct(i).Hsparse;
-    	mi = Sstruct(i).mfinal;
-    	sisj = Sstruct(i).Cfinal;
     	
+        J = JHstruct(i).Jsparse;
+        h = JHstruct(i).Hsparse;
+    	mi = Sstruct(i).mfinal;
+    	sisj = Sstruct(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
+    	
+        % For regular Cij
         tchk = tanh(h) - mi; 
         mtchk = mean(tchk);
 
         mimj = mi'*mi;
     	chi = sisj - mimj;
     	mchi = mean(chi,'all');
+
+        %%For nMF methods of Cij
+        % Brute force
+        Jmk = mi*J;
+        mk = tanh(h+Jmk);
+        mkmj = mk'*mk;
+        mfchi = sisj - mkmj;
+        mfmchi = mean(mfchi,'all');
+
+        % eq 4b.
+        mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
+        
+        % or is it:
+        % mfbCij = diag(1-mi.^2) + J*chi; 
+        % mfbCij = diag(1-mi.^2) + (1-mi.^2)*J*chi;
+
+
 
         if abs(mtchk) < 0.01
             saneh = 1;
@@ -46,6 +69,12 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
     	sanitydimer(i).mchi  = mchi;
         sanitydimer(i).saneh = saneh;
     	sanitydimer(i).sanechi = sanechi;
+        sanitydimer(i).Jmk = Jmk;
+        sanitydimer(i).mk = mk;
+        sanitydimer(i).mfchi = mfchi;
+        sanitydimer(i).mfmchi = mfmchi;
+        sanitydimer(i).mfbCij = mfbCij;
+
 
     end
 
