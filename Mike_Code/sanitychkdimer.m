@@ -19,10 +19,10 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
    for i = 1:jn
     	
-        J = JHstruct(i).Jsparse;
-        h = JHstruct(i).Hsparse;
-    	mi = Sstruct(i).mfinal;
-    	sisj = Sstruct(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
+        J = JHstructDimer(i).Jsparse;
+        h = JHstructDimer(i).Hsparse;
+    	mi = SstructDimer(i).mfinal;
+    	sisj = SstructDimer(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
     	
         % For regular Cij
         tchk = tanh(h) - mi; 
@@ -45,7 +45,8 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         
         % or is it:
         % mfbCij = diag(1-mi.^2) + J*chi; 
-        % mfbCij = diag(1-mi.^2) + (1-mi.^2)*J*chi;
+        % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
+
 
 
 

@@ -81,6 +81,17 @@ SstructDimer = Met_Hast_D(T,N,jn,JHDstruct,sparsity,time);
 sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHDstruct,sparsity,time,T);
 
+%% experimental stuff
+% making averages over all values of n_i
+% for i = 1:jn
+% end
+
+
+
+
+
+
+
 %Plot
 figure
 scatter(sort([Sstruct.mfinal]),sort([SstructDimer.mfinal]))
