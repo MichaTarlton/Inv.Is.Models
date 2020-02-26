@@ -12,7 +12,7 @@
 
 
 
-function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
+function sanity = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
    
    sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
@@ -113,7 +113,7 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
     end
 
 
-save([time(1:5),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
+save([time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
 %%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end

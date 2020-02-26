@@ -63,9 +63,9 @@ h_on = 1;
 %% Decimation algo, decimate random connections in coupling matrix
 % Sparsity setting is set from inside JH fnc currently
 
-%JHstruct = JH(N,jn,h_on,sparsity);
 
-JHstruct = JHs(N,jn,h_on,sparsity,time,T); %Turn off if runing the normal one
+JHstruct = JH(N,jn,h_on,sparsity,time,T);
+JHSstruct = JHs(N,jn,h_on,sparsity,time,T); %Turn off if runing the normal one
 JHDstruct = JD(N,jn,h_on,sparsity,time,T); %for dimers
 
 
@@ -75,10 +75,13 @@ JHDstruct = JD(N,jn,h_on,sparsity,time,T); %for dimers
 
 
 Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time);
+SstructDiscon = Met_Hast(T,N,jn,JHSstruct,sparsity,time);
 SstructDimer = Met_Hast_D(T,N,jn,JHDstruct,sparsity,time);
+
 %%% Part ??? SANITY CHECK
 
 sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T);
+sanitydiscon = sanitychkdiscon(jn,SstructDiscon,JHSstruct,sparsity,time,T);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHDstruct,sparsity,time,T);
 
 %% experimental stuff
@@ -88,13 +91,10 @@ sanitydimer = sanitychkdimer(jn,SstructDimer,JHDstruct,sparsity,time,T);
 
 
 
-
-
-
-
-%Plot
+%% Plot
+% Probably could break this out into a side thing
 figure
-scatter(sort([Sstruct.mfinal]),sort([SstructDimer.mfinal]))
+scatter(Sstruct(i).mfinal(:),SstructDimer(i).mfinal(:)))
 hold on 
 title({'Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)]})
 xlabel('Disconnected')
@@ -120,4 +120,4 @@ ylabel('Dimer')
 %% Pull Y vector, Do we generate this as a probablistic output layer as Bulso does (eq. 1 in his paper and pg.7 in my notes) 
 %%		He mentions something along these lines in his videochat
 
-
+%% Actually built some analtic infferrence methods into the sanit checks

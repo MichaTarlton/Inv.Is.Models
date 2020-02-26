@@ -12,73 +12,108 @@
 
 
 
-function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'saneh',{},'mimj',{},'chi',{},'mchi',{},'sanechi',{},
-                        'Jmk',{},'mk',{},'mfchi',{},'mfmchi',{},
-                        'mfaCij',{},'mfbCij',{}) 
+function sanity = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
+   sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{}); 
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
+
    for i = 1:jn
+        J = JHstruct(i).Jsparse;
+        h = JHstruct(i).Hsparse;
+    	mi = Sstruct(i).mfinal;
+        chi = Sstruct(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
+        S = Sstruct(i).S_hat;
     	
-        J = JHstructDimer(i).Jsparse;
-        h = JHstructDimer(i).Hsparse;
-    	mi = SstructDimer(i).mfinal;
-    	sisj = SstructDimer(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
     	
-        % For regular Cij
+        % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
+        % Removing for dimer check
+        % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
+        % 
         tchk = tanh(h) - mi; 
         mtchk = mean(tchk);
 
         mimj = mi'*mi;
-    	chi = sisj - mimj;
-    	mchi = mean(chi,'all');
+    	Cij = chi - mimj;
+        mCij = mean(Cij,'all');
+
+        % Don't need this rn
+        % if abs(mtchk) < 0.01
+        %     saneh = 1;
+        % else
+        %     saneh = 0;
+        % end
+        % 
+        % if abs(mCij) < 0.01
+        %     saneCij = 1;
+        % else
+        %     saneCij = 0;
+        % end
 
         %%For nMF methods of Cij
-        % Brute force
-        Jmk = mi*J;
-        mk = tanh(h+Jmk);
-        mkmj = mk'*mk;
-        mfchi = sisj - mkmj;
-        mfmchi = mean(mfchi,'all');
+        % Mean Field methods for MF inversion from Roudi/Hertz 2011
+            % Jmk = mi*J;
+            % mk = tanh(h+Jmk);
+            % mkmj = mk'*mk;
+            % mfchi = sisj - mkmj;
+            % mfmchi = mean(mfchi,'all');
 
-        % eq 4b.
-        mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
+        % Inferred h
+        Jmk = mi*J;
+        mfh = atanh(mi) - Jmk;
         
+        % Inferred J
+        Pij = diag(1-mi.^2);
+        Jmf = (Pij.^-1) - (Cij.^-1); 
+
+        % eq 4b. Mean Field inferred Cij from roudi 2009
+        mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+
+        % eq 4.
+        %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
         % or is it:
         % mfbCij = diag(1-mi.^2) + J*chi; 
         % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
 
 
+        %% TAP REconstruction
+        Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
+        htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2);
+
+        %%  Forward Construction from J
+        Ctap = (-J - 2.*(J.^2).*mimj).^-1;
+
+        %% differences between calculated and inferred
+        dmfC = abs(Cij(:) - mfC(:));
+        dtapC = abs(Cij(:) - Ctap(:));
+        dmfJ = abs(J(:) - Jmf(:));
+        dtapJ = abs(J(:) - Jtap(:));
+        dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
+        dtaph = abs(h(:) - htap(:)); 
 
 
-        if abs(mtchk) < 0.01
-            saneh = 1;
-        else
-            saneh = 0;
-        end
-
-    	if abs(mchi) < 0.01
-    		sanechi = 1;
-    	else
-    		sanechi = 0;
-    	end
-
-    	sanitydimer(i).th = tanh(h);
-        sanitydimer(i).tchk = tchk;
-        sanitydimer(i).mtchk = mtchk;
-    	sanitydimer(i).mimj = mimj;
-    	sanitydimer(i).chi = chi;
-    	sanitydimer(i).mchi  = mchi;
-        sanitydimer(i).saneh = saneh;
-    	sanitydimer(i).sanechi = sanechi;
-        sanitydimer(i).Jmk = Jmk;
-        sanitydimer(i).mk = mk;
-        sanitydimer(i).mfchi = mfchi;
-        sanitydimer(i).mfmchi = mfmchi;
-        sanitydimer(i).mfbCij = mfbCij;
+    	sanity(i).th = tanh(h);
+        sanity(i).tchk = tchk;
+        sanity(i).mtchk = mtchk;
+        sanity(i).mimj = mimj;
+        sanity(i).chi = chi;
+        sanity(i).Cij = Cij;
+        sanity(i).mCij  = mCij;
+        sanity(i).mfC = mfC;
+        sanity(i).mfJ = Jmf;
+        sanity(i).mfh = mfh;
+        sanity(i).tapJ = Jtap;
+        sanity(i).taph = htap;
+        sanity(i).tapC = Ctap;
+        sanity(i).dmfC = dmfC;
+        sanity(i).dtapC = dtapC;
+        sanity(i).dmfJ = dmfJ;
+        sanity(i).dtapJ = dtapJ;
+        sanity(i).dmfh = dmfh;
+        sanity(i).dtaph = dtaph;
+        
 
 
     end
 
-save(['sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
+save([time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
 %%save(['sanitydimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
 end

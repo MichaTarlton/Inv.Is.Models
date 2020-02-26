@@ -21,7 +21,7 @@ function JHstruct = JH(N,jn,h_on,sparsity,time)
         
     	if h_on == 1
 		h = randn(1,N);
-		hsparse = h.*double(rand(1,N)> sparsity);
+		hsparse = h.*(double(rand(1,N)> sparsity));
 		JHstruct(i).Hfield = h;
 		JHstruct(i).Hsparse = hsparse;
 		else
@@ -32,8 +32,9 @@ function JHstruct = JH(N,jn,h_on,sparsity,time)
 	JHstruct(i).Jgaus = R3;
 	JHstruct(i).Jsparse =  R3s;
 
-save(['JHstruct_N',num2str(N),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');	
-disp(['End J run ',num2str(i)]) % Current sate output
+save([time(1:5),'JHstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHstruct');	
+
+disp(['End JH Normal run ',num2str(i)]) % Current sate output
 
 
 end

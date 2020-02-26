@@ -10,7 +10,7 @@ function JHstruct = JD(N,jn,h_on,sparsity,time,T)
 		R = eye(N).*double(normrnd(0,1/N,[N,N]));
 		R = R/sqrt(N/2); 
 		R2 = R(:,randperm(N));
-		R3 = triu(R2)+triu(R2)';
+		R3 = triu(R2,1)+triu(R2,1)'; % Removes diagonal
 
 
 
@@ -39,7 +39,7 @@ function JHstruct = JD(N,jn,h_on,sparsity,time,T)
     	if h_on == 1
 
 		% h = randn(1,N);
-		% hsparse = h.*double(rand(1,N)> sparsity);
+		% hsparse = h.(*double(rand(1,N)> sparsity));
 		% JHstruct(i).Hfield = h;
 		% JHstruct(i).Hsparse = hsparse;
 		% else
@@ -52,9 +52,9 @@ function JHstruct = JD(N,jn,h_on,sparsity,time,T)
 	JHstruct(i).Jsparse =  R3;
 
 
-save(['JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'JHstruct');	
+save([time(1:5),'JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHstruct');	
 
-disp(['End J run ',num2str(i)]) % Current sate output
+disp(['End JH dimer run ',num2str(i)]) % Current sate output
 
 
 end
