@@ -12,9 +12,9 @@
 
 
 
-function sanity = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
+function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
    
-   sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
+   sanitydiscon = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
    for i = 1:jn
     	J = JHstruct(i).Jsparse;
@@ -90,30 +90,30 @@ function sanity = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
         dtaph = abs(h(:) - htap(:)); 
 
 
-        sanity(i).th = tanh(h);
-        sanity(i).tchk = tchk;
-        sanity(i).mtchk = mtchk;
-        sanity(i).mimj = mimj;
-        sanity(i).chi = chi;
-        sanity(i).Cij = Cij;
-        sanity(i).mCij  = mCij;
-        sanity(i).mfC = mfC;
-        sanity(i).mfJ = Jmf;
-        sanity(i).mfh = mfh;
-        sanity(i).tapJ = Jtap;
-        sanity(i).taph = htap;
-        sanity(i).tapC = Ctap;
-        sanity(i).dmfC = dmfC;
-        sanity(i).dtapC = dtapC;
-        sanity(i).dmfJ = dmfJ;
-        sanity(i).dtapJ = dtapJ;
-        sanity(i).dmfh = dmfh;
-        sanity(i).dtaph = dtaph;
+        sanitydiscon(i).th = tanh(h);
+        sanitydiscon(i).tchk = tchk;
+        sanitydiscon(i).mtchk = mtchk;
+        sanitydiscon(i).mimj = mimj;
+        sanitydiscon(i).chi = chi;
+        sanitydiscon(i).Cij = Cij;
+        sanitydiscon(i).mCij  = mCij;
+        sanitydiscon(i).mfC = mfC;
+        sanitydiscon(i).mfJ = Jmf;
+        sanitydiscon(i).mfh = mfh;
+        sanitydiscon(i).tapJ = Jtap;
+        sanitydiscon(i).taph = htap;
+        sanitydiscon(i).tapC = Ctap;
+        sanitydiscon(i).dmfC = dmfC;
+        sanitydiscon(i).dtapC = dtapC;
+        sanitydiscon(i).dmfJ = dmfJ;
+        sanitydiscon(i).dtapJ = dtapJ;
+        sanitydiscon(i).dmfh = dmfh;
+        sanitydiscon(i).dtaph = dtaph;
 
     end
 
 
-save([time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
+save([time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydiscon');
 %%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end

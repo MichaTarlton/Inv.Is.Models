@@ -12,8 +12,8 @@
 
 
 
-function sanity = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
-   sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{}); 
+function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
+   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{}); 
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
 
    for i = 1:jn
@@ -59,6 +59,8 @@ function sanity = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         % Inferred h
         Jmk = mi*J;
         mfh = atanh(mi) - Jmk;
+        % according Terada 2018 I should be using the Jmf instead of Jmk
+        % So something like this: mfh = atanh(mi) - Jmf;
         
         % Inferred J
         Pij = diag(1-mi.^2);
@@ -90,30 +92,30 @@ function sanity = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         dtaph = abs(h(:) - htap(:)); 
 
 
-    	sanity(i).th = tanh(h);
-        sanity(i).tchk = tchk;
-        sanity(i).mtchk = mtchk;
-        sanity(i).mimj = mimj;
-        sanity(i).chi = chi;
-        sanity(i).Cij = Cij;
-        sanity(i).mCij  = mCij;
-        sanity(i).mfC = mfC;
-        sanity(i).mfJ = Jmf;
-        sanity(i).mfh = mfh;
-        sanity(i).tapJ = Jtap;
-        sanity(i).taph = htap;
-        sanity(i).tapC = Ctap;
-        sanity(i).dmfC = dmfC;
-        sanity(i).dtapC = dtapC;
-        sanity(i).dmfJ = dmfJ;
-        sanity(i).dtapJ = dtapJ;
-        sanity(i).dmfh = dmfh;
-        sanity(i).dtaph = dtaph;
+    	sanitydimer(i).th = tanh(h);
+        sanitydimer(i).tchk = tchk;
+        sanitydimer(i).mtchk = mtchk;
+        sanitydimer(i).mimj = mimj;
+        sanitydimer(i).chi = chi;
+        sanitydimer(i).Cij = Cij;
+        sanitydimer(i).mCij  = mCij;
+        sanitydimer(i).mfC = mfC;
+        sanitydimer(i).mfJ = Jmf;
+        sanitydimer(i).mfh = mfh;
+        sanitydimer(i).tapJ = Jtap;
+        sanitydimer(i).taph = htap;
+        sanitydimer(i).tapC = Ctap;
+        sanitydimer(i).dmfC = dmfC;
+        sanitydimer(i).dtapC = dtapC;
+        sanitydimer(i).dmfJ = dmfJ;
+        sanitydimer(i).dtapJ = dtapJ;
+        sanitydimer(i).dmfh = dmfh;
+        sanitydimer(i).dtaph = dtaph;
         
 
 
     end
 
-save([time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
+save([time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
 %%save(['sanitydimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
 end

@@ -1,9 +1,9 @@
 %% J matrix for gas of dimers
 
-function JHstruct = JD(N,jn,h_on,sparsity,time,T)
+function JHdimer = JD(N,jn,h_on,sparsity,time,T)
 
    %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
+ 	JHdimer = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
 
 		R = eye(N);
@@ -40,19 +40,19 @@ function JHstruct = JD(N,jn,h_on,sparsity,time,T)
 
 		% h = randn(1,N);
 		% hsparse = h.(*double(rand(1,N)> sparsity));
-		% JHstruct(i).Hfield = h;
-		% JHstruct(i).Hsparse = hsparse;
+		% JHdimer(i).Hfield = h;
+		% JHdimer(i).Hsparse = hsparse;
 		% else
 
-		JHstruct(i).Hfield = zeros(1,N);
-		JHstruct(i).Hsparse = zeros(1,N);
+		JHdimer(i).Hfield = zeros(1,N);
+		JHdimer(i).Hsparse = zeros(1,N);
     	end
 
-	JHstruct(i).Jgaus = R3;
-	JHstruct(i).Jsparse =  R3;
+	JHdimer(i).Jgaus = R3;
+	JHdimer(i).Jsparse =  R3;
 
 
-save([time(1:5),'JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHstruct');	
+save([time(1:5),'JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
 
 disp(['End JH dimer run ',num2str(i)]) % Current sate output
 

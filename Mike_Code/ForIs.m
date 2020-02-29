@@ -64,9 +64,9 @@ h_on = 1;
 % Sparsity setting is set from inside JH fnc currently
 
 
-JHstruct = JH(N,jn,h_on,sparsity,time,T);
-JHSstruct = JHs(N,jn,h_on,sparsity,time,T); %Turn off if runing the normal one
-JHDstruct = JD(N,jn,h_on,sparsity,time,T); %for dimers
+JHnorm = JH(N,jn,h_on,sparsity,time,T);
+JHdiscon = JHs(N,jn,h_on,sparsity,time,T); %for disconnected J
+JHdimer = JD(N,jn,h_on,sparsity,time,T); %for dimers
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -74,15 +74,17 @@ JHDstruct = JD(N,jn,h_on,sparsity,time,T); %for dimers
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 
-Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time);
-SstructDiscon = Met_Hast(T,N,jn,JHSstruct,sparsity,time);
-SstructDimer = Met_Hast_D(T,N,jn,JHDstruct,sparsity,time);
+Sstruct = Met_Hast(T,N,jn,JHnorm,sparsity,time);
+SstructDiscon = Met_Hast(T,N,jn,JHdiscon,sparsity,time);
+SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time);
 
 %%% Part ??? SANITY CHECK
 
-sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T);
-sanitydiscon = sanitychkdiscon(jn,SstructDiscon,JHSstruct,sparsity,time,T);
-sanitydimer = sanitychkdimer(jn,SstructDimer,JHDstruct,sparsity,time,T);
+sanity = sanitychk(jn,Sstruct,JHnorm,sparsity,time,T);
+sanitydiscon = sanitychkdiscon(jn,SstructDiscon,JHdiscon,sparsity,time,T);
+sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T);
+
+diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityinput,sanitydimer,sanitydiscon)
 
 %% experimental stuff
 % making averages over all values of n_i
@@ -114,6 +116,15 @@ hold on
 title({'Correlation Check: chi = sisj - mimj',['N = ',num2str(N)],['T = ',num2str(T)]})
 xlabel('Disconnected')
 ylabel('Dimer')
+
+
+figure
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'b')
+hold on 
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'r')
+title({'Disconnected Jtap v real',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('J real')
+ylabel('J Tap: red, J mf: Blue')
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat

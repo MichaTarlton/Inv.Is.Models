@@ -12,33 +12,33 @@
 
 
 
-function JHstruct = JHs(N,jn,h_on,sparsity,time,T)
+function JHdiscon = JHs(N,jn,h_on,sparsity,time,T)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
+ 	JHdiscon = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 
  		for i = 1:jn
 	R3 = zeros(N,N);
         
     	if h_on == 1
 		h = ones(1,N);
-		JHstruct(i).Hfield = h;
-		JHstruct(i).Hsparse = h;
+		JHdiscon(i).Hfield = h;
+		JHdiscon(i).Hsparse = h;
 		else
-		JHstruct(i).Hfield = zeros(1,N);
-		JHstruct(i).Hsparse = zeros(1,N);
+		JHdiscon(i).Hfield = zeros(1,N);
+		JHdiscon(i).Hsparse = zeros(1,N);
     	end
 
     	% To sparsify all other H values, supressing for now
     	% if i > 1 
     	% 	h = randn(1,N);
 		% 	hsparse = h.*(double(rand(1,N)> sparsity));
-		% 	JHstruct(i).Hfield = h;
-		% 	JHstruct(i).Hsparse = hsparse;
+		% 	JHdiscon(i).Hfield = h;
+		% 	JHdiscon(i).Hsparse = hsparse;
 		% end
 
-	JHstruct(i).Jgaus = R3;
-	JHstruct(i).Jsparse =  R3;
-	save([time(1:5),'JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHstruct');
+	JHdiscon(i).Jgaus = R3;
+	JHdiscon(i).Jsparse =  R3;
+	save([time(1:5),'JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdiscon');
 	disp(['End JH disconnected run ',num2str(i)]) % Current sate output
 	end
 

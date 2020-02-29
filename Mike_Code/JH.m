@@ -1,6 +1,6 @@
-function JHstruct = JH(N,jn,h_on,sparsity,time)
+function JHnorm = JH(N,jn,h_on,sparsity,time,T)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHstruct = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
+ 	JHnorm = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
 	R = double(normrnd(0,1/N,[N,N]));
 	R = R - diag(diag(R));
@@ -22,17 +22,17 @@ function JHstruct = JH(N,jn,h_on,sparsity,time)
     	if h_on == 1
 		h = randn(1,N);
 		hsparse = h.*(double(rand(1,N)> sparsity));
-		JHstruct(i).Hfield = h;
-		JHstruct(i).Hsparse = hsparse;
+		JHnorm(i).Hfield = h;
+		JHnorm(i).Hsparse = hsparse;
 		else
-		JHstruct(i).Hfield = zeros(1,N);
-		JHstruct(i).Hsparse = zeros(1,N);;
+		JHnorm(i).Hfield = zeros(1,N);
+		JHnorm(i).Hsparse = zeros(1,N);
     	end
 
-	JHstruct(i).Jgaus = R3;
-	JHstruct(i).Jsparse =  R3s;
+	JHnorm(i).Jgaus = R3;
+	JHnorm(i).Jsparse =  R3s;
 
-save([time(1:5),'JHstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHstruct');	
+save([time(1:5),'JHnorm_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
 
 disp(['End JH Normal run ',num2str(i)]) % Current sate output
 

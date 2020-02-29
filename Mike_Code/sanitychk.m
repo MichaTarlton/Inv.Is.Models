@@ -12,9 +12,9 @@
 
 
 
-function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
+function sanitynorm = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
    
-   sanity = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
+   sanitynorm = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
    for i = 1:jn
     	J = JHstruct(i).Jsparse;
@@ -23,49 +23,27 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
         chi = Sstruct(i).Cfinal;
         S = Sstruct(i).S_hat;
 
-          	
-        % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
-        % Removing for dimer check
-        % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
-        % 
-        tchk = tanh(h) - mi; 
-        mtchk = mean(tchk);
-
         mimj = mi'*mi;
         Cij = chi - mimj;
         mCij = mean(Cij,'all');
 
-        % Don't need this rn
-        % if abs(mtchk) < 0.01
-        %     saneh = 1;
-        % else
-        %     saneh = 0;
-        % end
-        % 
-        % if abs(mCij) < 0.01
-        %     saneCij = 1;
-        % else
-        %     saneCij = 0;
-        % end
-
+          	
+        % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
+        % Removing for dimer check
+        % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
+        % Roudi Check for disconnected (J=0) matrix
+        tchk = tanh(h) - mi; 
+       
     %%For nMF methods of Cij
+
+    % Fix this, need to start with the gen Cij and mi then gen C, then Jmf, then hmf
+
     % Mean Field methods for MF inversion from Roudi/Hertz 2011
        % Jmk = mi*J;
        % mk = tanh(h+Jmk);
        % mkmj = mk'*mk;
        % mfchi = sisj - mkmj;
        % mfmchi = mean(mfchi,'all');
-
-    % Inferred h
-    Jmk = mi*J;
-    mfh = atanh(mi) - Jmk;
-        
-    % Inferred J 
-    Pij = diag(1-mi.^2);
-    Jmf = (Pij.^-1) - (Cij.^-1);
-
-    % eq 4b. Mean Field inferred Cij from roudi 2009
-    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij; 
     
     % eq 4.
     %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
@@ -73,10 +51,25 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
     % mfbCij = diag(1-mi.^2) + J*chi; 
     % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
 
+    % eq 4b. Mean Field inferred Cij from roudi 2009
+    % Taking difference of C arrays is stupid as one is a permutation of the other
+    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+        
+    % Inferred J 
+    Pij = diag(1-mi.^2);
+    Jmf = (Pij.^-1) - (mfC.^-1);
+
+    % Inferred h mean field
+    Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
+    mfh = atanh(mi) - Jmf; % and then the J here should be the inferred J
+
+    % Now do forward
+
+
 
     %% TAP REconstruction
     Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
-    htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2);
+    htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
     Ctap = (-J - 2.*(J.^2).*mimj).^-1;
@@ -90,30 +83,45 @@ function sanity = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
         dtaph = abs(h(:) - htap(:)); 
 
 
-        sanity(i).th = tanh(h);
-        sanity(i).tchk = tchk;
-        sanity(i).mtchk = mtchk;
-        sanity(i).mimj = mimj;
-        sanity(i).chi = chi;
-        sanity(i).Cij = Cij;
-        sanity(i).mCij  = mCij;
-        sanity(i).mfC = mfC;
-        sanity(i).mfJ = Jmf;
-        sanity(i).mfh = mfh;
-        sanity(i).tapJ = Jtap;
-        sanity(i).taph = htap;
-        sanity(i).tapC = Ctap;
-        sanity(i).dmfC = dmfC;
-        sanity(i).dtapC = dtapC;
-        sanity(i).dmfJ = dmfJ;
-        sanity(i).dtapJ = dtapJ;
-        sanity(i).dmfh = dmfh;
-        sanity(i).dtaph = dtaph;
+        sanitynorm(i).th = tanh(h);
+        sanitynorm(i).tchk = tchk;
+        sanitynorm(i).mtchk = mean(tchk);
+        sanitynorm(i).mimj = mimj;
+        sanitynorm(i).chi = chi;
+        sanitynorm(i).Cij = Cij;
+        sanitynorm(i).mCij  = mCij;
+        sanitynorm(i).mfC = mfC;
+        sanitynorm(i).mfJ = Jmf;
+        sanitynorm(i).mfh = mfh;
+        sanitynorm(i).tapJ = Jtap;
+        sanitynorm(i).taph = htap;
+        sanitynorm(i).tapC = Ctap;
+        sanitynorm(i).dmfC = dmfC;
+        sanitynorm(i).dtapC = dtapC;
+        sanitynorm(i).dmfJ = dmfJ;
+        sanitynorm(i).dtapJ = dtapJ;
+        sanitynorm(i).dmfh = dmfh;
+        sanitynorm(i).dtaph = dtaph;
 
     end
 
 
-save([time(1:5),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanity');
+save([time(1:5),'sanitynorm_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitynorm');
 %%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
+
+
+% Vestigial snips
+
+        % if abs(mtchk) < 0.01
+        %     saneh = 1;
+        % else
+        %     saneh = 0;
+        % end
+        % 
+        % if abs(mCij) < 0.01
+        %     saneCij = 1;
+        % else
+        %     saneCij = 0;
+        % end
