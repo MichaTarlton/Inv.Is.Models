@@ -84,7 +84,7 @@ sanity = sanitychk(jn,Sstruct,JHnorm,sparsity,time,T);
 sanitydiscon = sanitychkdiscon(jn,SstructDiscon,JHdiscon,sparsity,time,T);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T);
 
-diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityinput,sanitydimer,sanitydiscon)
+diffchkstruct = diffchk(jn,N,T,sparsity,time,sanity,sanitydimer,sanitydiscon)
 
 %% experimental stuff
 % making averages over all values of n_i

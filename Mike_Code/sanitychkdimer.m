@@ -16,74 +16,66 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
    sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{}); 
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
 
-   for i = 1:jn
+      for i = 1:jn
         J = JHstruct(i).Jsparse;
         h = JHstruct(i).Hsparse;
-    	mi = Sstruct(i).mfinal;
-        chi = Sstruct(i).Cfinal; % Cfinal = S_hat'*S_hat/T;
+        mi = Sstruct(i).mfinal;
+        chi = Sstruct(i).Cfinal;
         S = Sstruct(i).S_hat;
-    	
-    	
+
+        mimj = mi'*mi;
+        Cij = chi - mimj;
+        mCij = mean(Cij,'all');
+
+            
         % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
         % Removing for dimer check
         % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
-        % 
+        % Roudi Check for disconnected (J=0) matrix
         tchk = tanh(h) - mi; 
-        mtchk = mean(tchk);
+       
+    %%For nMF methods of Cij
 
-        mimj = mi'*mi;
-    	Cij = chi - mimj;
-        mCij = mean(Cij,'all');
+    % Fix this, need to start with the gen Cij and mi then gen C, then Jmf, then hmf
 
-        % Don't need this rn
-        % if abs(mtchk) < 0.01
-        %     saneh = 1;
-        % else
-        %     saneh = 0;
-        % end
-        % 
-        % if abs(mCij) < 0.01
-        %     saneCij = 1;
-        % else
-        %     saneCij = 0;
-        % end
+    % Mean Field methods for MF inversion from Roudi/Hertz 2011
+       % Jmk = mi*J;
+       % mk = tanh(h+Jmk);
+       % mkmj = mk'*mk;
+       % mfchi = sisj - mkmj;
+       % mfmchi = mean(mfchi,'all');
+    
+    % eq 4.
+    %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
+    % or is it:
+    % mfbCij = diag(1-mi.^2) + J*chi; 
+    % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
 
-        %%For nMF methods of Cij
-        % Mean Field methods for MF inversion from Roudi/Hertz 2011
-            % Jmk = mi*J;
-            % mk = tanh(h+Jmk);
-            % mkmj = mk'*mk;
-            % mfchi = sisj - mkmj;
-            % mfmchi = mean(mfchi,'all');
-
-        % Inferred h
-        Jmk = mi*J;
-        mfh = atanh(mi) - Jmk;
-        % according Terada 2018 I should be using the Jmf instead of Jmk
-        % So something like this: mfh = atanh(mi) - Jmf;
+    % eq 4b. Mean Field inferred Cij from roudi 2009
+    % Taking difference of C arrays is stupid as one is a permutation of the other
+    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
         
-        % Inferred J
-        Pij = diag(1-mi.^2);
-        Jmf = (Pij.^-1) - (Cij.^-1); 
+    % Inferred J 
+    Pij = diag(1-mi.^2);
+    Jmf = (Pij.^-1) - (Cij.^-1);
+    % Jmf = (Pij.^-1) - (mfC.^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
-        % eq 4b. Mean Field inferred Cij from roudi 2009
-        mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    % Inferred h mean field
+    % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
+    mfh = atanh(mi) - Jmf; % and then the J here should be the inferred J
 
-        % eq 4.
-        %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
-        % or is it:
-        % mfbCij = diag(1-mi.^2) + J*chi; 
-        % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
+    % Now do forward
 
 
-        %% TAP REconstruction
-        Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
-        htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2);
 
-        %%  Forward Construction from J
-        Ctap = (-J - 2.*(J.^2).*mimj).^-1;
+    %% TAP REconstruction
+    Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
+    htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
+    
+    %%  Forward Construction from J
+    Ctap = (-J - 2.*(J.^2).*mimj).^-1;
 
-        %% differences between calculated and inferred
+    %% differences between calculated and inferred
         dmfC = abs(Cij(:) - mfC(:));
         dtapC = abs(Cij(:) - Ctap(:));
         dmfJ = abs(J(:) - Jmf(:));
@@ -92,9 +84,9 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         dtaph = abs(h(:) - htap(:)); 
 
 
-    	sanitydimer(i).th = tanh(h);
+        sanitydimer(i).th = tanh(h);
         sanitydimer(i).tchk = tchk;
-        sanitydimer(i).mtchk = mtchk;
+        sanitydimer(i).mtchk = mean(tchk);
         sanitydimer(i).mimj = mimj;
         sanitydimer(i).chi = chi;
         sanitydimer(i).Cij = Cij;
@@ -111,11 +103,22 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         sanitydimer(i).dtapJ = dtapJ;
         sanitydimer(i).dmfh = dmfh;
         sanitydimer(i).dtaph = dtaph;
-        
-
 
     end
-
 save([time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
 %%save(['sanitydimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
 end
+
+% Vestigial snips
+
+        % if abs(mtchk) < 0.01
+        %     saneh = 1;
+        % else
+        %     saneh = 0;
+        % end
+        % 
+        % if abs(mCij) < 0.01
+        %     saneCij = 1;
+        % else
+        %     saneCij = 0;
+        % end

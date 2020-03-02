@@ -57,11 +57,12 @@ function sanitynorm = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T)
         
     % Inferred J 
     Pij = diag(1-mi.^2);
-    Jmf = (Pij.^-1) - (mfC.^-1);
+    Jmf = (Pij.^-1) - (Cij.^-1); % using this for now as this seems closer to what I think it is
+    % Jmf = (Pij.^-1) - (mfC.^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
     % Inferred h mean field
-    Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
-    mfh = atanh(mi) - Jmf; % and then the J here should be the inferred J
+    % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
+    mfh = atanh(mi) - mi*Jmf; % and then the J here should be the inferred J
 
     % Now do forward
 
