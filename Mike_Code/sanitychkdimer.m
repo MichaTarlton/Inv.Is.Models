@@ -12,8 +12,8 @@
 
 
 
-function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{}); 
+function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
+   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{},'Jpair',{},'JLR',{}); 
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
 
       for i = 1:jn
@@ -75,6 +75,15 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
     %%  Forward Construction from J
     Ctap = (-J - 2.*(J.^2).*mimj).^-1;
 
+
+    %% Indie Pair Approximation for gas of dimers
+
+    Jpair = log(((1 + mi' + mi + chi).*(1 - mi' - mi + chi))./((1 - mi' + mi - chi).*(1 + mi' - mi - chi)))./4;
+    Jpair2(~isfinite(Jpair2)) = 0;
+
+    % JLR = log(1 + Cij./((1+mi).^2))./4;
+
+
     %% differences between calculated and inferred
         dmfC = abs(Cij(:) - mfC(:));
         dtapC = abs(Cij(:) - Ctap(:));
@@ -103,9 +112,11 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T)
         sanitydimer(i).dtapJ = dtapJ;
         sanitydimer(i).dmfh = dmfh;
         sanitydimer(i).dtaph = dtaph;
+        sanitydimer(i).Jpair = Jpair;
+        sanitydimer(i).JLR = JLR;
 
     end
-save([time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
+save([name,'\',time(1:6),'sanitydimer_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
 %%save(['sanitydimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
 end
 

@@ -1,4 +1,4 @@
-function JHnorm = JH(N,jn,h_on,sparsity,time,T)
+function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHnorm = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
@@ -32,7 +32,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T)
 	JHnorm(i).Jgaus = R3;
 	JHnorm(i).Jsparse =  R3s;
 
-save([time(1:5),'JHnorm_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
+save([name,'\',time(1:5),'JHnorm_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
 
 disp(['End JH Normal run ',num2str(i)]) % Current sate output
 

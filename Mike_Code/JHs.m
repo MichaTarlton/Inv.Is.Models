@@ -1,4 +1,4 @@
-%%%JHsanity.m
+%%%JHs.m Disconnect matrix
 
 %% Do sanity check, create clean inputs as defined by Yasser:
 				% `Your code should get connectivity matrix J and external field vector h. 
@@ -12,7 +12,7 @@
 
 
 
-function JHdiscon = JHs(N,jn,h_on,sparsity,time,T)
+function JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHdiscon = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 
@@ -29,16 +29,16 @@ function JHdiscon = JHs(N,jn,h_on,sparsity,time,T)
     	end
 
     	% To sparsify all other H values, supressing for now
-    	% if i > 1 
-    	% 	h = randn(1,N);
-		% 	hsparse = h.*(double(rand(1,N)> sparsity));
-		% 	JHdiscon(i).Hfield = h;
-		% 	JHdiscon(i).Hsparse = hsparse;
-		% end
+    	if i > 1 
+    		h = randn(1,N);
+			hsparse = h.*(double(rand(1,N)> sparsity));
+			JHdiscon(i).Hfield = h;
+			JHdiscon(i).Hsparse = hsparse;
+		end
 
 	JHdiscon(i).Jgaus = R3;
 	JHdiscon(i).Jsparse =  R3;
-	save([time(1:5),'JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdiscon');
+	save([name,'\',time(1:5),'JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdiscon');
 	disp(['End JH disconnected run ',num2str(i)]) % Current sate output
 	end
 

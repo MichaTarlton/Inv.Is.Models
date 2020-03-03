@@ -1,0 +1,29 @@
+Forward Calculation for nmf and TAP
+
+"You can analytically solve for m and C (it is a good exercise) and you can also find the solution in many papers (including my PRE paper in 2011 (2009) with John Hertz) and then check your simulations results agains the analytical expression."
+
+%% nMF
+How, since they all are dependent on themselves?
+like mi is dependent on mj, and C is dependent on mi
+
+hmmmmm maybe do like mi = tan(h), but this only works with the disconnected matrix, dimer idk
+
+
+
+
+From eq10 roudi/hertz 2013 
+
+
+-(nmfC).^-1 = Jij % so no just invert this for the C. Also note this is for decoupled
+
+Yeah just confused about how to solve with the dimer case, I think I may need to do a gradient descent or something to figure it out
+
+
+Indie pair approx
+
+Jpair Element Template: (1 + mi' + mi + chi)
+
+Jpair = ln(((1 + mi' + mi + chi)(1 - mi' - mi + chi))./((1 - mi' + mi - chi)(1 + mi' - mi - chi)))./4
+
+
+JLR = ln(1 + Cij./((1+mi).^2)))./4

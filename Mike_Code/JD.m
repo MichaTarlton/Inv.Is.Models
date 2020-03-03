@@ -1,6 +1,6 @@
 %% J matrix for gas of dimers
 
-function JHdimer = JD(N,jn,h_on,sparsity,time,T)
+function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
 
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHdimer = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
@@ -52,7 +52,7 @@ function JHdimer = JD(N,jn,h_on,sparsity,time,T)
 	JHdimer(i).Jsparse =  R3;
 
 
-save([time(1:5),'JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
+save([name,'\',time(1:5),'JHDstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
 
 disp(['End JH dimer run ',num2str(i)]) % Current sate output
 

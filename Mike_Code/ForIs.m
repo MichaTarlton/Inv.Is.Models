@@ -54,6 +54,8 @@ sparsity = 0;
 
 time = datestr(now,'HHMM-ddmmmyy');
 
+name = [time(1:5),'parameters_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12)];
+
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist
 
@@ -64,9 +66,10 @@ h_on = 1;
 % Sparsity setting is set from inside JH fnc currently
 
 
-JHnorm = JH(N,jn,h_on,sparsity,time,T);
-JHdiscon = JHs(N,jn,h_on,sparsity,time,T); %for disconnected J
-JHdimer = JD(N,jn,h_on,sparsity,time,T); %for dimers
+JHnorm = JH(N,jn,h_on,sparsity,time,T,name);
+JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name); %for disconnected J
+JHdimer = JD(N,jn,h_on,sparsity,time,T,name); %for dimers
+% JHferr = Jferr(N,jn,h_on,sparsity,time,T); %For ferromagnetic lattice
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -74,17 +77,22 @@ JHdimer = JD(N,jn,h_on,sparsity,time,T); %for dimers
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 
-Sstruct = Met_Hast(T,N,jn,JHnorm,sparsity,time);
-SstructDiscon = Met_Hast(T,N,jn,JHdiscon,sparsity,time);
-SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time);
+StructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
+SstructDisc = Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,name);
+SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,name);
 
 %%% Part ??? SANITY CHECK
 
-sanity = sanitychk(jn,Sstruct,JHnorm,sparsity,time,T);
-sanitydiscon = sanitychkdiscon(jn,SstructDiscon,JHdiscon,sparsity,time,T);
-sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T);
+sanitynorm = sanitychk(jn,SstructNorm,JHnorm,sparsity,time,T,name);
+sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,name);
+sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
 
-diffchkstruct = diffchk(jn,N,T,sparsity,time,sanity,sanitydimer,sanitydiscon)
+diffchkstruct = diffchk(jn,N,T,sparsity,time,sanity,sanitydimer,sanitydisc,name)
+
+%% Saving stuff
+
+mkdir(cd,name)
+save([name,'\',time(1:5),'parameters_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
 
 %% experimental stuff
 % making averages over all values of n_i
@@ -96,8 +104,10 @@ diffchkstruct = diffchk(jn,N,T,sparsity,time,sanity,sanitydimer,sanitydiscon)
 %% Plot
 % Probably could break this out into a side thing
 figure
-scatter(Sstruct(i).mfinal(:),SstructDimer(i).mfinal(:)))
+scatter([Sstruct.mfinal],[sanitydiscon.th])
+axis([-1 1 -1 1])
 hold on 
+refline(1,0) 
 title({'Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)]})
 xlabel('Disconnected')
 ylabel('Dimer')

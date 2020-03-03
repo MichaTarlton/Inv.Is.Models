@@ -21,7 +21,7 @@
 %
 %
 
-function SstructDimer = Met_Hast_D(T,N,jn,JHstruct,sparsity,time,name)
+function SstructDisc = Met_Hast_Disc(T,N,jn,JHstruct,sparsity,time,name)
 
 	
 % initial settings, copied wholesale from Nicola
@@ -30,7 +30,7 @@ Int = 10*N; 				%steps interval between two different measurements (10 swips)
 Navg = T*Int;			%| end state number of iterations post equilibrium reached
 Energy = zeros(1,Nequil+Navg); 	%|
 
-SstructDimer = struct('S_hat',{},'mfinal',{},'Cfinal',{},'mequil',{},'Cequil',{});
+SstructDisc = struct('S_hat',{},'mfinal',{},'Cfinal',{},'mequil',{},'Cequil',{});
 
 
 for i = 1:jn
@@ -151,18 +151,18 @@ for i = 1:jn
 	%%%%%%%%%%%%%%%%%%% END OF LOOP AFTER EQUILIBRIUM %%%%%%%%%%%%%%%%%%%%%%%%
 	
 	% final estimates of magnetisation and correlation
-	SstructDimer(i).S_hat = S_hat;
-	SstructDimer(i).mfinal = mean(S_hat);
-	SstructDimer(i).Cfinal = S_hat'*S_hat/T;
-	SstructDimer(i).mequil = mean(S_eq);
-	SstructDimer(i).Cequil = S_eq'*S_eq/T;
+	SstructDisc(i).S_hat = S_hat;
+	SstructDisc(i).mfinal = mean(S_hat);
+	SstructDisc(i).Cfinal = S_hat'*S_hat/T;
+	SstructDisc(i).mequil = mean(S_eq);
+	SstructDisc(i).Cequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
-	save([name,'\',time(1:5),'SstructDimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructDimer','-v7.3');
+	save([name,'\',time(1:5),'SstructDisc_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructDisc','-v7.3');
 	disp(['End S run ',num2str(i)])
 end
 
 
-%%save(['SstructDimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'SstructDimer');
+%%save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
 
 end

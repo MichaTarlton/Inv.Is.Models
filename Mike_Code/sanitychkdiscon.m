@@ -12,7 +12,7 @@
 
 
 
-function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
+function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name)
    
    sanitydiscon = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
@@ -73,7 +73,12 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
-    Ctap = (-J - 2.*(J.^2).*mimj).^-1;
+    %make mag first
+    mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2))
+
+    tapmimj =
+
+    Ctap = (-J - 2.*(J.^2).*tapmimj).^-1;
 
     %% differences between calculated and inferred
         dmfC = abs(Cij(:) - mfC(:));
@@ -107,7 +112,7 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T)
     end
 
 
-save([time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydiscon');
+save([name,'\',time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydiscon');
 %%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
