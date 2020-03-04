@@ -79,7 +79,19 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
     %% Indie Pair Approximation for gas of dimers
 
     Jpair = log(((1 + mi' + mi + chi).*(1 - mi' - mi + chi))./((1 - mi' + mi - chi).*(1 + mi' - mi - chi)))./4;
-    Jpair2(~isfinite(Jpair2)) = 0;
+    Jpair(~isfinite(Jpair)) = 0;
+
+    % Forward for C and h = 0
+    % Cpair = (exp(4.*J) + 1 (+/-) 2exp(2.*J))./(exp(4.*J) - 1);
+    %Cpair = (exp(4.*J) + 1)./(exp(4.*J) - 1)
+    Cpair = (exp(4.*J) + 1)./(exp(4.*J) - 1) - (2.*sqrt(exp(4.*J)))/abs(exp(4.*J)-1)
+
+    % Wolfram Solution
+    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J<0
+    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J>0
+
+
+
 
     % JLR = log(1 + Cij./((1+mi).^2))./4;
 

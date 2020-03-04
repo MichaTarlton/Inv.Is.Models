@@ -62,7 +62,7 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name
 
     % Inferred h mean field
     % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
-    mfh = atanh(mi) - Jmf; % and then the J here should be the inferred J
+    mfh = atanh(mi) - mi*Jmf; % and then the J here should be the inferred J
 
     % Now do forward
 
@@ -76,7 +76,7 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name
     %make mag first
     mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2))
 
-    tapmimj =
+    % tapmimj =
 
     Ctap = (-J - 2.*(J.^2).*tapmimj).^-1;
 

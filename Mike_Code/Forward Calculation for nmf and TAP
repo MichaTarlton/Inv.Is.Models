@@ -27,3 +27,80 @@ Jpair = ln(((1 + mi' + mi + chi)(1 - mi' - mi + chi))./((1 - mi' + mi - chi)(1 +
 
 
 JLR = ln(1 + Cij./((1+mi).^2)))./4
+
+
+
+
+
+%% Plot
+% Probably could break this out into a side thing
+figure
+scatter([Sstruct.mfinal],[sanitydiscon.th])
+axis([-1 1 -1 1])
+hold on 
+refline(1,0) 
+title({'Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
+
+figure
+scatter(sort([sanity.tchk]),sort([sanitydimer.tchk]))
+hold on 
+title({'Magnetization Check: th(h) - mi',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
+
+
+figure
+scatter(sort(mean([sanity.chi])),sort(mean([sanitydimer.chi])))
+hold on 
+title({'Correlation Check: chi = sisj - mimj',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('Disconnected')
+ylabel('Dimer')
+
+
+figure
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'b')
+hold on 
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'r')
+title({'Disconnected Jtap v real',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('J real')
+ylabel('J Tap: red, J mf: Blue')
+
+figure
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'b')
+hold on 
+scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'r')
+title({'Disconnected Jtap v real',['N = ',num2str(N)],['T = ',num2str(T)]})
+xlabel('J real')
+ylabel('J Tap: red, J mf: Blue')
+
+
+%% stuffffff
+mx = [SstructDisc.mfinal];
+my = [sanitydisc.th];
+mtchk=mean([sanitydisc.mtchk]);
+
+figure
+scatter(mx(:),my(:))
+axis([-1 1 -1 1])
+hold on 
+%refline(1,0) 
+title({'Disconnected J Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)],['Avg. difference between M values = ',num2str(mtchk)],['No. Samples = ',num2str(length(mx))]})
+xlabel('Generated from Monte Carlo')
+ylabel('Calcualted from mi = tanh(h)')
+
+
+
+Cx = [sanitydimer.Cij]
+Cy = [sanitydimer.Cpair]
+
+figure
+scatter(Cx(:),Cy(:))
+%axis([-1 1 -1 1])
+refline(1,0)
+hold on 
+%refline(1,0) 
+title({'Correlations for Dimers',['N = ',num2str(N)],['T = ',num2str(T)],['Avg. difference between M values = ',num2str(mean(abs(Cx(:)-Cy(:)),'all'))],['No. Samples = ',num2str(length(Cx(:)))]})
+xlabel('Generated Correlations')
+ylabel('Correlation for Indie Pair and given J')
