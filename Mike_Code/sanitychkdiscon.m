@@ -74,7 +74,8 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name
     
     %%  Forward Construction from J
     %make mag first
-    mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2))
+    mtap = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2)) %better version
+    %mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2)) % old version
 
     % tapmimj =
 

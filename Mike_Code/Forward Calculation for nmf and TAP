@@ -28,7 +28,27 @@ Jpair = ln(((1 + mi' + mi + chi)(1 - mi' - mi + chi))./((1 - mi' + mi - chi)(1 +
 
 JLR = ln(1 + Cij./((1+mi).^2)))./4
 
+%% Script for generating mi, this is actually a loop
+% gotta figure out the trial ceiling
+% also something about changing m calculation to ensure they approach correct values, sometimes the leap to high in estimate value
 
+mtap = rand(1,N)
+for i = 1:(Need to make a convincing thing)
+
+ mtapnew = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2))
+ mtap = mtapnew
+
+end
+
+Fuuuuck something wrong with this, keeps converging to the exact same fucking thing
+oh wait, well I think that works, certainly converges to *Something*
+
+mtap = rand(1,N)'
+for i = 1:N*1e3
+ mtapnew = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2));
+ mtap = mtapnew;
+end
+ disp(mtap')
 
 
 
@@ -104,3 +124,5 @@ hold on
 title({'Correlations for Dimers',['N = ',num2str(N)],['T = ',num2str(T)],['Avg. difference between M values = ',num2str(mean(abs(Cx(:)-Cy(:)),'all'))],['No. Samples = ',num2str(length(Cx(:)))]})
 xlabel('Generated Correlations')
 ylabel('Correlation for Indie Pair and given J')
+
+
