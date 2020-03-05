@@ -1,16 +1,13 @@
-%% J matrix for gas of dimers
+%% J matrix for Ferromagnetic lattice
 
-function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
+function JHferr = JF(N,jn,h_on,sparsity,time,T,name)
 
    %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHdimer = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
+ 	JHferr = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
 
-		R = eye(N);
-		R = eye(N).*double(normrnd(0,1/N,[N,N]));
-		R = R/sqrt(N/2); 
-		R2 = R(:,randperm(N));
-		R3 = triu(R2,1)+triu(R2,1)'; % Removes diagonal
+		R = ones(N);
+		R3 = triu(R,1)+triu(R,1)'; % Removes diagonal
 
 
 
@@ -40,21 +37,21 @@ function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
 
 		% h = randn(1,N);
 		% hsparse = h.(*double(rand(1,N)> sparsity));
-		% JHdimer(i).Hfield = h;
-		% JHdimer(i).Hsparse = hsparse;
+		% JHferr(i).Hfield = h;
+		% JHferr(i).Hsparse = hsparse;
 		% else
 
-		JHdimer(i).Hfield = zeros(1,N);
-		JHdimer(i).Hsparse = zeros(1,N);
+		JHferr(i).Hfield = zeros(1,N);
+		JHferr(i).Hsparse = zeros(1,N);
     	end
 
-	JHdimer(i).Jgaus = R3;
-	JHdimer(i).Jsparse =  R3;
+	JHferr(i).Jgaus = R3;
+	JHferr(i).Jsparse =  R3;
 
 
-save([name,'\',time(1:5),'JHDstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
+save([name,'\',time(1:5),'JHDstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHferr');	
 
-disp(['End JH dimer run ',num2str(i)]) % Current sate output
+disp(['End JH ferr run ',num2str(i)]) % Current sate output
 
 
 end

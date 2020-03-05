@@ -158,11 +158,11 @@ for i = 1:jn
 	SstructDimer(i).Cequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
-	save([name,'\',time(1:5),'SstructDimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructDimer','-v7.3');
+	save([name,'\',time(1:5),'SstructDimer_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructDimer','-v7.3');
 	disp(['End S run ',num2str(i)])
 end
 
 
-%%save(['SstructDimer_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'SstructDimer');
+%%save(['SstructDimer_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'SstructDimer');
 
 end

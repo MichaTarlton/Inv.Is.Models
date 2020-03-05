@@ -38,7 +38,7 @@ function JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name)
 
 	JHdiscon(i).Jgaus = R3;
 	JHdiscon(i).Jsparse =  R3;
-	save([name,'\',time(1:5),'JHsanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdiscon');
+	save([name,'\',time(1:5),'JHsanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdiscon');
 	disp(['End JH disconnected run ',num2str(i)]) % Current sate output
 	end
 

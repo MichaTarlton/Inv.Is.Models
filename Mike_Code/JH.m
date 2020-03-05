@@ -32,7 +32,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
 	JHnorm(i).Jgaus = R3;
 	JHnorm(i).Jsparse =  R3s;
 
-save([name,'\',time(1:5),'JHnorm_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
+save([name,'\',time(1:5),'JHnorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
 
 disp(['End JH Normal run ',num2str(i)]) % Current sate output
 

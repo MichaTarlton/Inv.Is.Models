@@ -12,9 +12,9 @@
 
 
 
-function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name)
+function sanitydisc = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name)
    
-   sanitydiscon = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
+   sanitydisc = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
       for i = 1:jn
         J = JHstruct(i).Jsparse;
@@ -57,8 +57,8 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name
         
     % Inferred J 
     Pij = diag(1-mi.^2);
-    Jmf = (Pij.^-1) - (Cij.^-1);
-    % Jmf = (Pij.^-1) - (mfC.^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
+    Jmf = (Pij^-1) - (Cij^-1);
+    % Jmf = (Pij^-1) - (mfC^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
     % Inferred h mean field
     % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
@@ -69,53 +69,53 @@ function sanitydiscon = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name
 
 
     %% TAP REconstruction
-    Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
+    Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
     %make mag first
-    mtap = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2)) %better version
+    %mtap = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2)) %better version
     %mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2)) % old version
 
     % tapmimj =
 
-    Ctap = (-J - 2.*(J.^2).*tapmimj).^-1;
+    %Ctap = (-J - 2.*(J.^2).*tapmimj)^-1;
 
     %% differences between calculated and inferred
         dmfC = abs(Cij(:) - mfC(:));
-        dtapC = abs(Cij(:) - Ctap(:));
+        %dtapC = abs(Cij(:) - Ctap(:));
         dmfJ = abs(J(:) - Jmf(:));
         dtapJ = abs(J(:) - Jtap(:));
         dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
         dtaph = abs(h(:) - htap(:)); 
 
 
-        sanitydiscon(i).th = tanh(h);
-        sanitydiscon(i).tchk = tchk;
-        sanitydiscon(i).mtchk = mean(tchk);
-        sanitydiscon(i).mimj = mimj;
-        sanitydiscon(i).chi = chi;
-        sanitydiscon(i).Cij = Cij;
-        sanitydiscon(i).mCij  = mCij;
-        sanitydiscon(i).mfC = mfC;
-        sanitydiscon(i).mfJ = Jmf;
-        sanitydiscon(i).mfh = mfh;
-        sanitydiscon(i).tapJ = Jtap;
-        sanitydiscon(i).taph = htap;
-        sanitydiscon(i).tapC = Ctap;
-        sanitydiscon(i).dmfC = dmfC;
-        sanitydiscon(i).dtapC = dtapC;
-        sanitydiscon(i).dmfJ = dmfJ;
-        sanitydiscon(i).dtapJ = dtapJ;
-        sanitydiscon(i).dmfh = dmfh;
-        sanitydiscon(i).dtaph = dtaph;
+        sanitydisc(i).th = tanh(h);
+        sanitydisc(i).tchk = tchk;
+        sanitydisc(i).mtchk = mean(tchk);
+        sanitydisc(i).mimj = mimj;
+        sanitydisc(i).chi = chi;
+        sanitydisc(i).Cij = Cij;
+        sanitydisc(i).mCij  = mCij;
+        sanitydisc(i).mfC = mfC;
+        sanitydisc(i).mfJ = Jmf;
+        sanitydisc(i).mfh = mfh;
+        sanitydisc(i).tapJ = Jtap;
+        sanitydisc(i).taph = htap;
+        %sanitydisc(i).tapC = Ctap;
+        sanitydisc(i).dmfC = dmfC;
+        %sanitydisc(i).dtapC = dtapC;
+        sanitydisc(i).dmfJ = dmfJ;
+        sanitydisc(i).dtapJ = dtapJ;
+        sanitydisc(i).dmfh = dmfh;
+        sanitydisc(i).dtaph = dtaph;
 
     end
 
 
-save([name,'\',time(1:5),'sanitydiscon_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydiscon');
-%%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
-%%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+save([name,'\',time(1:5),'sanitydisc_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydisc');
+%%save(['sanity_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+%%save(['sanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
 
 % Vestigial snips

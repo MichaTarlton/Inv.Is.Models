@@ -107,9 +107,9 @@ function sanitynorm = sanitychk(jn,Sstruct,JHstruct,sparsity,time,T,name)
     end
 
 
-save([name,'\',time(1:5),'sanitynorm_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitynorm');
-%%save(['sanity_N',num2str(length(h)),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
-%%save(['sanity_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+save([name,'\',time(1:5),'sanitynorm_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitynorm');
+%%save(['sanity_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+%%save(['sanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
 
 

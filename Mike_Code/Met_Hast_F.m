@@ -21,7 +21,7 @@
 %
 %
 
-function Sstruct = Met_Hast(T,N,jn,JHstruct,sparsity,time)
+function SstructFerr = Met_Hast_F(T,N,jn,JHstruct,sparsity,time,name)
 
 	
 % initial settings, copied wholesale from Nicola
@@ -30,7 +30,7 @@ Int = 10*N; 				%steps interval between two different measurements (10 swips)
 Navg = T*Int;			%| end state number of iterations post equilibrium reached
 Energy = zeros(1,Nequil+Navg); 	%|
 
-Sstruct = struct('S_hat',{},'mfinal',{},'Cfinal',{},'mequil',{},'Cequil',{});
+SstructFerr = struct('S_hat',{},'mfinal',{},'Cfinal',{},'mequil',{},'Cequil',{});
 
 
 for i = 1:jn
@@ -151,18 +151,18 @@ for i = 1:jn
 	%%%%%%%%%%%%%%%%%%% END OF LOOP AFTER EQUILIBRIUM %%%%%%%%%%%%%%%%%%%%%%%%
 	
 	% final estimates of magnetisation and correlation
-	Sstruct(i).S_hat = S_hat;
-	Sstruct(i).mfinal = mean(S_hat);
-	Sstruct(i).Cfinal = S_hat'*S_hat/T;
-	Sstruct(i).mequil = mean(S_eq);
-	Sstruct(i).Cequil = S_eq'*S_eq/T;
+	SstructFerr(i).S_hat = S_hat;
+	SstructFerr(i).mfinal = mean(S_hat);
+	SstructFerr(i).Cfinal = S_hat'*S_hat/T;
+	SstructFerr(i).mequil = mean(S_eq);
+	SstructFerr(i).Cequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
-	save(['Sstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct','-v7.3');
+	save([name,'\',time(1:5),'SstructFerr_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructFerr','-v7.3');
 	disp(['End S run ',num2str(i)])
 end
 
 
-%%save(['Sstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
+%%save(['SstructFerr_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'SstructFerr');
 
 end

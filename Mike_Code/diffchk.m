@@ -142,7 +142,7 @@ diffchk.sanitydiscon.dtaph =	mean(t,'all');
 	
 	
 
-save([name,'\',time(1:5),'DiffChkr_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'diffchk');
+save([name,'\',time(1:5),'DiffChkr_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'diffchk');
 
 diffchkstruct = diffchk;
 end

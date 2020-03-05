@@ -158,11 +158,11 @@ for i = 1:jn
 	SstructNorm(i).Cequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
-	save([name,'\',time(1:5),'SstructNorm_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');
+	save([name,'\',time(1:5),'SstructNorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');
 	disp(['End S run ',num2str(i)])
 end
 
 
-%%save(['Sstruct_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
+%%save(['Sstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time,'.mat'],'Sstruct');
 
 end

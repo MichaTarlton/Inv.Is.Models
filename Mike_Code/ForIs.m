@@ -51,16 +51,17 @@ T = 1e6; %| Presetting the T.calculation: 3*M(numel(M))
 N = 50;
 jn = 10; %| Trials
 sparsity = 0;
+h_on = 1; %% h field genereation
 
 time = datestr(now,'HHMM-ddmmmyy');
 
-name = [time(1:5),'parameters_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12)];
+name = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12)];
+mkdir(cd,name);
+save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
 
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist
 
-%% h field genereation
-h_on = 1;
 
 %% Decimation algo, decimate random connections in coupling matrix
 % Sparsity setting is set from inside JH fnc currently
@@ -68,8 +69,8 @@ h_on = 1;
 
 JHnorm = JH(N,jn,h_on,sparsity,time,T,name);
 JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name); %for disconnected J
-JHdimer = JD(N,jn,h_on,sparsity,time,T,name); %for dimers
-% JHferr = Jferr(N,jn,h_on,sparsity,time,T); %For ferromagnetic lattice
+JHdimer = JD(N,jn,h_on,sparsity,time,T,name); 	%for dimers
+%JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -77,64 +78,29 @@ JHdimer = JD(N,jn,h_on,sparsity,time,T,name); %for dimers
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 
-StructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
+SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
 SstructDisc = Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,name);
 SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,name);
+%SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
 
 %%% Part ??? SANITY CHECK
 
-sanitynorm = sanitychk(jn,SstructNorm,JHnorm,sparsity,time,T,name);
+sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,name);
 sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,name);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
+%sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
 
-diffchkstruct = diffchk(jn,N,T,sparsity,time,sanity,sanitydimer,sanitydisc,name)
+%diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityorm,sanitydimer,sanitydisc,sanityferr,name)
 
 %% Saving stuff
 
-mkdir(cd,name)
-save([name,'\',time(1:5),'parameters_N',num2str(N),'_T',num2str(T),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
-
-%% experimental stuff
-% making averages over all values of n_i
-% for i = 1:jn
-% end
 
 
 
 %% Plot
 % Probably could break this out into a side thing
-figure
-scatter([Sstruct.mfinal],[sanitydiscon.th])
-axis([-1 1 -1 1])
-hold on 
-refline(1,0) 
-title({'Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(T)]})
-xlabel('Disconnected')
-ylabel('Dimer')
-
-figure
-scatter(sort([sanity.tchk]),sort([sanitydimer.tchk]))
-hold on 
-title({'Magnetization Check: th(h) - mi',['N = ',num2str(N)],['T = ',num2str(T)]})
-xlabel('Disconnected')
-ylabel('Dimer')
-
-
-figure
-scatter(sort(mean([sanity.chi])),sort(mean([sanitydimer.chi])))
-hold on 
-title({'Correlation Check: chi = sisj - mimj',['N = ',num2str(N)],['T = ',num2str(T)]})
-xlabel('Disconnected')
-ylabel('Dimer')
-
-
-figure
-scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'b')
-hold on 
-scatter(JHdimer.Jsparse,sanitydiscon.mfJ,[],'r')
-title({'Disconnected Jtap v real',['N = ',num2str(N)],['T = ',num2str(T)]})
-xlabel('J real')
-ylabel('J Tap: red, J mf: Blue')
+Graphs(SstructDisc,sanitydimer,sanitydisc,N,T)
+JGraphs(JHnorm,sanitynorm,N,T)
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat
