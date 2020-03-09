@@ -2,31 +2,28 @@
 % For Correlation and magnetization sanity checks
 
 
-function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T)%N,jn,h_on,sparsity,time,T,name)
+function Graphs(Sstruct,sanity,N,T,jtype)%N,jn,h_on,sparsity,time,T,name)
 
-mx = [SstructDisc.mfinal];
-my = [sanitydisc.th];
-fmx = [SstructFerr.mfinal];
-fmy = [sanityferr.th];
-mtchk=mean([sanitydisc.mtchk]);
+mx = [Sstruct.mfinal];
+my = [sanity.th];
+mtchk=mean([sanity.mtchk]);
 
 figure
 subplot(1,2,1)
-scatter(mx(:),my(:),[],'b')
+scatter(mx(:),my(:))
 %axis([-1 1 -1 1])
 
 refline(1,0) 
 hold on 
-scatter(fmx(:),fmy(:),[],'r')
-title({'Disconnected J Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(log10(T))],['Avg. difference between M values (disconnected) = ',num2str(mtchk)]})
+title({jtype,' Magnetizations: mi',['N = ',num2str(N)],['T = ',num2str(log10(T))],['Avg. difference between M values = ',num2str(mtchk)]})
 xlabel('Generated from Monte Carlo')
-ylabel('Calcualted from mean field methods. Blue: Disconnected Red: Ferromagnetic')
+ylabel('Calcualted from mi = tanh(h)')
 
 %Correlation
 
 Cx = [sanitydimer.Cij];
 %Cy = [sanitydimer.Cpair];
-Cy1 = [sanitydimer.Cpair1].*1e-4; %seems to normalize a bit
+Cy1 = [sanitydimer.Cpair1].*1e-4; %seems to normalizee a bit
 Cy2 = [sanitydimer.Cpair2];
 Cy3 = [sanitydimer.Cpair3];
 

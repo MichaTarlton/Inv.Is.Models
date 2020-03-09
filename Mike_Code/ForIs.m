@@ -70,7 +70,7 @@ save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_tr
 JHnorm = JH(N,jn,h_on,sparsity,time,T,name);
 JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name); %for disconnected J
 JHdimer = JD(N,jn,h_on,sparsity,time,T,name); 	%for dimers
-%JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
+JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -81,7 +81,7 @@ JHdimer = JD(N,jn,h_on,sparsity,time,T,name); 	%for dimers
 SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
 SstructDisc = Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,name);
 SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,name);
-%SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
+SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
 
 %%% Part ??? SANITY CHECK
 
@@ -99,8 +99,18 @@ sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
 
 %% Plot
 % Probably could break this out into a side thing
-Graphs(SstructDisc,sanitydimer,sanitydisc,N,T)
+
+Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T)
+
+%Graphs(SstructNorm,sanitynorm,N,T,'Normal Distribution')
+%Graphs(SstructDisc,sanitydisc,N,T,'Disconnected')
+%Graphs(SstructDimer,sanitydimer,N,T,'Independent Pairs')
+%Graphs(SstructFerr,sanityferr,N,T,'Ferromagnetic')
+
 JGraphs(JHnorm,sanitynorm,N,T)
+JGraphs(JHdiscon,sanitydisc,N,T)
+JGraphs(JHdimer,sanitydimer,N,T)
+JGraphs(JHferr,sanityferr,N,T)
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat

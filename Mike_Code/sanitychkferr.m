@@ -14,7 +14,7 @@
 
 function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
    
-   sanityferr = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
+   sanityferr = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'mferr',{},'tapJ',{},'taph',{},'tapC',{});
     
    for i = 1:jn
     	J = JHstruct(i).Jsparse;
@@ -27,7 +27,9 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
         Cij = chi - mimj;
         mCij = mean(Cij,'all');
 
-          	
+    %% Mean field methods
+    %% Forward
+
         % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
         % Removing for dimer check
         % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
@@ -44,6 +46,18 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
        % mkmj = mk'*mk;
        % mfchi = sisj - mkmj;
        % mfmchi = mean(mfchi,'all');
+
+    %% Ferr magnetization forward mean field method
+    % mferr = tanh((J.*mferr' + h)./(T1)) %From eq.3.36 in Amit
+    
+
+    N = length(h);
+    mferr = rand(1,N)';
+    for ii = 1:N
+        mferrnew = tanh((J.*0.3*mferr + h')./(1)); %Using T=1 per nicola's instruction also J=0.3
+        mferr = mferrnew;
+    end
+    disp(mferr')
     
     % eq 4.
     %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
@@ -53,35 +67,42 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
 
     % eq 4b. Mean Field inferred Cij from roudi 2009
     % Taking difference of C arrays is stupid as one is a permutation of the other
-    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    % mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    mfC = rand(N,N);
+    for iii = 1:N
+        mfCnew = diag(1-mferr.^2) + (1-mferr.^2)'.*J*mfC; %This isn't working but who cares rn
+        mfC = mfCnew;
+    end
+    disp(mfC)
         
     % Inferred J 
     Pij = diag(1-mi.^2);
-    Jmf = (Pij.^-1) - (Cij.^-1); % using this for now as this seems closer to what I think it is
-    % Jmf = (Pij.^-1) - (mfC.^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
+    Jmf = (Pij^-1) - (Cij^-1); % using this for now as this seems closer to what I think it is
+    % Jmf = (Pij^-1) - (mfC^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
     % Inferred h mean field
     % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
     mfh = atanh(mi) - mi*Jmf; % and then the J here should be the inferred J
 
-    % Now do forward
-
-
+   
 
     %% TAP REconstruction
-    Jtap = -2.*(Cij.^-1)./(1 + sqrt(1-8.*(Cij.^-1).*mimj));
+    Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
-    Ctap = (-J - 2.*(J.^2).*mimj).^-1;
+    % Ctap = (-J - 2.*(J.^2).*mimj)^-1;
+    Ctap = (-J - 2.*(J.^2).*mimj)^-1;
+
+    
 
     %% differences between calculated and inferred
-        dmfC = abs(Cij(:) - mfC(:));
-        dtapC = abs(Cij(:) - Ctap(:));
-        dmfJ = abs(J(:) - Jmf(:));
-        dtapJ = abs(J(:) - Jtap(:));
-        dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
-        dtaph = abs(h(:) - htap(:)); 
+        %dmfC = abs(Cij(:) - mfC(:));
+        %dtapC = abs(Cij(:) - Ctap(:));
+        %dmfJ = abs(J(:) - Jmf(:));
+        %dtapJ = abs(J(:) - Jtap(:));
+        %dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
+        %dtaph = abs(h(:) - htap(:)); 
 
 
         sanityferr(i).th = tanh(h);
@@ -94,15 +115,16 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
         sanityferr(i).mfC = mfC;
         sanityferr(i).mfJ = Jmf;
         sanityferr(i).mfh = mfh;
+        sanityferr(i).mferr = mferr;
         sanityferr(i).tapJ = Jtap;
         sanityferr(i).taph = htap;
         sanityferr(i).tapC = Ctap;
-        sanityferr(i).dmfC = dmfC;
-        sanityferr(i).dtapC = dtapC;
-        sanityferr(i).dmfJ = dmfJ;
-        sanityferr(i).dtapJ = dtapJ;
-        sanityferr(i).dmfh = dmfh;
-        sanityferr(i).dtaph = dtaph;
+        %sanityferr(i).dmfC = dmfC;
+        %sanityferr(i).dtapC = dtapC;
+        %sanityferr(i).dmfJ = dmfJ;
+        %sanityferr(i).dtapJ = dtapJ;
+        %sanityferr(i).dmfh = dmfh;
+        %sanityferr(i).dtaph = dtaph;
 
     end
 
