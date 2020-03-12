@@ -7,7 +7,8 @@ function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
 	for i = 1:jn
 
 		R = eye(N);
-		R = eye(N).*double(normrnd(0,1/N,[N,N]));
+		%R = eye(N).*double(normrnd(0,1/N,[N,N]));
+        R = eye(N).*double(normrnd(0,1/nthroot(N,3),[N,N]));
 		R = R/sqrt(N/2); 
 		R2 = R(:,randperm(N));
 		R3 = triu(R2,1)+triu(R2,1)'; % Removes diagonal

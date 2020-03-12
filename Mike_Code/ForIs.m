@@ -47,14 +47,23 @@
 % Possibly add option for distribution chosen
 clear all;
 
-T = 1e6; %| Presetting the T.calculation: 3*M(numel(M))
-N = 50;
-jn = 10; %| Trials
+%Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
+%Nval = [10,20,30,40,50];
+Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
+Nval = [100,200,300,400,500];
+
+jn = 1; %| Trials
 sparsity = 0;
 h_on = 1; %% h field genereation
 
 time = datestr(now,'HHMM-ddmmmyy');
 
+for Ti = 1:length(Tval)
+    T = Tval(Ti);
+
+for Ni = 1:length(Nval)
+    N = Nval(Ni);
+    
 name = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12)];
 mkdir(cd,name);
 save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
@@ -88,7 +97,7 @@ SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
 sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,name);
 sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,name);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
-%sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
+sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
 
 %diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityorm,sanitydimer,sanitydisc,sanityferr,name)
 
@@ -100,17 +109,17 @@ sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
 %% Plot
 % Probably could break this out into a side thing
 
-Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T)
+Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time);
 
 %Graphs(SstructNorm,sanitynorm,N,T,'Normal Distribution')
 %Graphs(SstructDisc,sanitydisc,N,T,'Disconnected')
 %Graphs(SstructDimer,sanitydimer,N,T,'Independent Pairs')
 %Graphs(SstructFerr,sanityferr,N,T,'Ferromagnetic')
 
-JGraphs(JHnorm,sanitynorm,N,T)
-JGraphs(JHdiscon,sanitydisc,N,T)
-JGraphs(JHdimer,sanitydimer,N,T)
-JGraphs(JHferr,sanityferr,N,T)
+Jgraphs(JHnorm,sanitynorm,N,T,name,time);
+Jgraphs(JHdiscon,sanitydisc,N,T,name,time);
+Jgraphs(JHdimer,sanitydimer,N,T,name,time);
+Jgraphs(JHferr,sanityferr,N,T,name,time);
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat
@@ -118,3 +127,6 @@ JGraphs(JHferr,sanityferr,N,T)
 %%		He mentions something along these lines in his videochat
 
 %% Actually built some analtic infferrence methods into the sanit checks
+
+end
+end

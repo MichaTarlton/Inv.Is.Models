@@ -2,7 +2,7 @@
 % For Correlation and magnetization sanity checks
 
 
-function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T)%N,jn,h_on,sparsity,time,T,name)
+function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time)%N,jn,h_on,sparsity,time,T,name)
 
 mx = [SstructDisc.mfinal];
 my = [sanitydisc.th];
@@ -10,7 +10,8 @@ fmx = [SstructFerr.mfinal];
 fmy = [sanityferr.th];
 mtchk=mean([sanitydisc.mtchk]);
 
-figure
+%h = figure;
+h = figure('Position', get(0, 'Screensize'))
 subplot(1,2,1)
 scatter(mx(:),my(:),[],'b')
 %axis([-1 1 -1 1])
@@ -44,3 +45,6 @@ title({'Correlations for Dimers',['N = ',num2str(N)],['T = ',num2str(log10(T))],
 xlabel('Generated Correlations. Blue: eq8 w/o irrational, Red: eq8 w irrational, Pink: C = tanh(J) ')
 ylabel('Correlation for Indie Pair and given J')
 
+savefig(h,[name,'\',time(1:5),'SanityGraphs_N',num2str(N),'_T1E',num2str(log10(T)),'_',time(6:12),'.fig'],'compact')
+saveas(h,[time(1:5),'SanityGraphs_N',num2str(N),'_T1E',num2str(log10(T)),'_',time(6:12),'.png'])
+%saveas(h,[name,'\',time(1:5),'SanityGraphs_N',num2str(N),'_T1E',num2str(log10(T)),'_',time(6:12),'.png'])
