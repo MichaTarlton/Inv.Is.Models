@@ -27,56 +27,48 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,name)
         Cij = chi - mimj;
         mCij = mean(Cij,'all');
 
-          	
-        % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
-        % Removing for dimer check
-        % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
-        % Roudi Check for disconnected (J=0) matrix
-        tchk = tanh(h) - mi; 
-       
-    %%For nMF methods of Cij
-
-    % Fix this, need to start with the gen Cij and mi then gen C, then Jmf, then hmf
+    %% Forward construction
+    
+    % nMF Construction
 
     % Mean Field methods for MF inversion from Roudi/Hertz 2011
+    % Check mags using MF method, eq. 51 berg, equation is: mfmi = tanh(h + mi*J)
+    % Could also invert Reconstruction equation below
+
        % Jmk = mi*J;
        % mk = tanh(h+Jmk);
        % mkmj = mk'*mk;
        % mfchi = sisj - mkmj;
        % mfmchi = mean(mfchi,'all');
-    
-    % eq 4.
-    %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
-    % or is it:
-    % mfbCij = diag(1-mi.^2) + J*chi; 
-    % mfbCij = diag(1-mi.^2) + (1-mi.^2)'.*J*chi; %This one is my closest guess so far
 
     % eq 4b. Mean Field inferred Cij from roudi 2009
     % Taking difference of C arrays is stupid as one is a permutation of the other
-    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
-        
+    % mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    
+
+    % TAP Construction
+    %  Forward Construction from J
+    Ctap = (-J - 2.*(J^2).*mimj)^-1;
+
+
+
+    %% Infered Reconstruction
+
+    % nMF
     % Inferred J 
     Pij = diag(1-mi.^2);
     Jmf = (Pij^-1) - (Cij^-1); % using this for now as this seems closer to what I think it is
-    % Jmf = (Pij^-1) - (mfC^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
-    % Inferred h mean field
-    % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
-    mfh = atanh(mi) - mi*Jmf; % and then the J here should be the inferred J
+    % Inferred h
+    mfh = atanh(mi) - mi*Jmf;
 
-    % Now do forward
-
-
-
-    %% TAP REconstruction
+    % TAP REconstruction
     Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap^2)*(1-mi'.^2); % need to review this formula carefully
-    
-    %%  Forward Construction from J
-    Ctap = (-J - 2.*(J^2).*mimj)^-1;
+
 
     %% differences between calculated and inferred
-        dmfC = abs(Cij(:) - mfC(:));
+        %dmfC = abs(Cij(:) - mfC(:));
         dtapC = abs(Cij(:) - Ctap(:));
         dmfJ = abs(J(:) - Jmf(:));
         dtapJ = abs(J(:) - Jtap(:));
@@ -85,19 +77,19 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,name)
 
 
         sanitynorm(i).th = tanh(h);
-        sanitynorm(i).tchk = tchk;
-        sanitynorm(i).mtchk = mean(tchk);
+        %sanitynorm(i).tchk = tchk;
+        %sanitynorm(i).mtchk = mean(tchk);
         sanitynorm(i).mimj = mimj;
         sanitynorm(i).chi = chi;
         sanitynorm(i).Cij = Cij;
         sanitynorm(i).mCij  = mCij;
-        sanitynorm(i).mfC = mfC;
+        %sanitynorm(i).mfC = mfC;
         sanitynorm(i).mfJ = Jmf;
         sanitynorm(i).mfh = mfh;
         sanitynorm(i).tapJ = Jtap;
         sanitynorm(i).taph = htap;
         sanitynorm(i).tapC = Ctap;
-        sanitynorm(i).dmfC = dmfC;
+        %sanitynorm(i).dmfC = dmfC;
         sanitynorm(i).dtapC = dtapC;
         sanitynorm(i).dmfJ = dmfJ;
         sanitynorm(i).dtapJ = dtapJ;

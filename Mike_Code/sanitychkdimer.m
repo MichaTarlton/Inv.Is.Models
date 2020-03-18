@@ -13,7 +13,7 @@
 
 
 function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{},'Jpair',{},'JLR',{},'Cpair1',{},'Cpair2',{},'Cpair3',{}); 
+   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{},'Jpair',{},'hpair',{},'JLR',{},'Cpair3',{}); 
                 %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
 
       for i = 1:jn
@@ -32,7 +32,7 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
         % Removing for dimer check
         % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
         % Roudi Check for disconnected (J=0) matrix
-        tchk = tanh(h) - mi; 
+        % tchk = tanh(h) - mi; 
        
     %%For nMF methods of Cij
 
@@ -81,10 +81,12 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
     Jpair = log(((1 + mi' + mi + chi).*(1 - mi' - mi + chi))./((1 - mi' + mi - chi).*(1 + mi' - mi - chi)))./4;
     Jpair(~isfinite(Jpair)) = 0;
 
+    hpair = atanh(mi) - mi*Jpair; %reusing the nmf equation
+
     % Forward for C and h = 0
     % Cpair = (exp(4.*J) + 1 (+/-) 2exp(2.*J))./(exp(4.*J) - 1);
-    Cpair1 = (exp(4.*J) + 1)./(exp(4.*J) - 1);
-    Cpair2 = (exp(4.*J) + 1)./(exp(4.*J) - 1) - (2.*sqrt(exp(4.*J)))/abs(exp(4.*J)-1);
+    % Cpair1 = (exp(4.*J) + 1)./(exp(4.*J) - 1);
+    % Cpair2 = (exp(4.*J) + 1)./(exp(4.*J) - 1) - (2.*sqrt(exp(4.*J)))/abs(exp(4.*J)-1);
     Cpair3 = tanh(J); % Nicola's suggested construction
 
     % Wolfram Solution
@@ -107,8 +109,8 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
 
 
         sanitydimer(i).th = tanh(h);
-        sanitydimer(i).tchk = tchk;
-        sanitydimer(i).mtchk = mean(tchk);
+        %sanitydimer(i).tchk = tchk;
+        %sanitydimer(i).mtchk = mean(tchk);
         sanitydimer(i).mimj = mimj;
         sanitydimer(i).chi = chi;
         sanitydimer(i).Cij = Cij;
@@ -126,8 +128,9 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
         sanitydimer(i).dmfh = dmfh;
         sanitydimer(i).dtaph = dtaph;
         sanitydimer(i).Jpair = Jpair;
-        sanitydimer(i).Cpair1 = Cpair1;
-        sanitydimer(i).Cpair2 = Cpair2;
+        sanitydimer(i).hpair = hpair;
+        %sanitydimer(i).Cpair1 = Cpair1;
+        %sanitydimer(i).Cpair2 = Cpair2;
         sanitydimer(i).Cpair3 = Cpair3;
         %sanitydimer(i).JLR = JLR;
 

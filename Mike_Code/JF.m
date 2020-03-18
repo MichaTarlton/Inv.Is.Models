@@ -49,7 +49,7 @@ function JHferr = JF(N,jn,h_on,sparsity,time,T,name)
 	JHferr(i).Jsparse =  R3;
 
 
-save([name,'\',time(1:5),'JHDstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHferr');	
+save([name,'\',time(1:5),'JHferr_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHferr');	
 
 disp(['End JH ferr run ',num2str(i)]) % Current sate output
 

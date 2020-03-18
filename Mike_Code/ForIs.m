@@ -52,6 +52,7 @@ clear all;
 Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 Nval = [100,200,300,400,500];
 
+
 jn = 1; %| Trials
 sparsity = 0;
 h_on = 1; %% h field genereation
@@ -79,7 +80,7 @@ save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_tr
 JHnorm = JH(N,jn,h_on,sparsity,time,T,name);
 JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name); %for disconnected J
 JHdimer = JD(N,jn,h_on,sparsity,time,T,name); 	%for dimers
-JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
+%JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -90,14 +91,14 @@ JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
 SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
 SstructDisc = Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,name);
 SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,name);
-SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
+%SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
 
 %%% Part ??? SANITY CHECK
 
 sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,name);
 sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,name);
 sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
-sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
+%sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
 
 %diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityorm,sanitydimer,sanitydisc,sanityferr,name)
 
