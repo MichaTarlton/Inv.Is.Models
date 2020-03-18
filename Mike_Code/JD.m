@@ -53,7 +53,7 @@ function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
 	JHdimer(i).Jsparse =  R3;
 
 
-save([name,'\',time(1:5),'JHDstruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
+save([name,'\',time(1:5),'JHdimer_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHdimer');	
 
 disp(['End JH dimer run ',num2str(i)]) % Current sate output
 

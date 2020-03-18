@@ -1,4 +1,4 @@
-%%%sanitychkdimer.m
+%%%sanitychk.m
 
 %% Do sanity check, create clean inputs as defined by Yasser:
 				% `Your code should get connectivity matrix J and external field vector h. 
@@ -12,10 +12,10 @@
 
 
 
-function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{},'Jpair',{},'hpair',{},'JLR',{},'Cpair3',{}); 
-                %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
-
+function sanitydisc = sanitychkdiscon(jn,Sstruct,JHstruct,sparsity,time,T,name)
+   
+   sanitydisc = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
+    
       for i = 1:jn
         J = JHstruct(i).Jsparse;
         h = JHstruct(i).Hsparse;
@@ -32,7 +32,7 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
         % Removing for dimer check
         % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
         % Roudi Check for disconnected (J=0) matrix
-        % tchk = tanh(h) - mi; 
+        tchk = tanh(h) - mi; 
        
     %%For nMF methods of Cij
 
@@ -73,70 +73,49 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
-    Ctap = (-J - 2.*(J.^2).*mimj)^-1;
+    %make mag first
+    %mtap = tanh(h' + J*mtap - mtap'.*(J.^2)*(1-mtap.^2)) %better version
+    %mtap = tanh(h + J*mtap' - mtap.*(J.^2)*(1-mtap'.^2)) % old version
 
+    % tapmimj =
 
-    %% Indie Pair Approximation for gas of dimers
-
-    Jpair = log(((1 + mi' + mi + chi).*(1 - mi' - mi + chi))./((1 - mi' + mi - chi).*(1 + mi' - mi - chi)))./4;
-    Jpair(~isfinite(Jpair)) = 0;
-
-    hpair = atanh(mi) - mi*Jpair; %reusing the nmf equation
-
-    % Forward for C and h = 0
-    % Cpair = (exp(4.*J) + 1 (+/-) 2exp(2.*J))./(exp(4.*J) - 1);
-    % Cpair1 = (exp(4.*J) + 1)./(exp(4.*J) - 1);
-    % Cpair2 = (exp(4.*J) + 1)./(exp(4.*J) - 1) - (2.*sqrt(exp(4.*J)))/abs(exp(4.*J)-1);
-    Cpair3 = tanh(J); % Nicola's suggested construction
-
-    % Wolfram Solution
-    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J<0
-    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J>0
-
-
-
-
-    % JLR = log(1 + Cij./((1+mi).^2))./4;
-
+    %Ctap = (-J - 2.*(J.^2).*tapmimj)^-1;
 
     %% differences between calculated and inferred
         dmfC = abs(Cij(:) - mfC(:));
-        dtapC = abs(Cij(:) - Ctap(:));
+        %dtapC = abs(Cij(:) - Ctap(:));
         dmfJ = abs(J(:) - Jmf(:));
         dtapJ = abs(J(:) - Jtap(:));
         dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
         dtaph = abs(h(:) - htap(:)); 
 
 
-        sanitydimer(i).th = tanh(h);
-        %sanitydimer(i).tchk = tchk;
-        %sanitydimer(i).mtchk = mean(tchk);
-        sanitydimer(i).mimj = mimj;
-        sanitydimer(i).chi = chi;
-        sanitydimer(i).Cij = Cij;
-        sanitydimer(i).mCij  = mCij;
-        sanitydimer(i).mfC = mfC;
-        sanitydimer(i).mfJ = Jmf;
-        sanitydimer(i).mfh = mfh;
-        sanitydimer(i).tapJ = Jtap;
-        sanitydimer(i).taph = htap;
-        sanitydimer(i).tapC = Ctap;
-        sanitydimer(i).dmfC = dmfC;
-        sanitydimer(i).dtapC = dtapC;
-        sanitydimer(i).dmfJ = dmfJ;
-        sanitydimer(i).dtapJ = dtapJ;
-        sanitydimer(i).dmfh = dmfh;
-        sanitydimer(i).dtaph = dtaph;
-        sanitydimer(i).Jpair = Jpair;
-        sanitydimer(i).hpair = hpair;
-        %sanitydimer(i).Cpair1 = Cpair1;
-        %sanitydimer(i).Cpair2 = Cpair2;
-        sanitydimer(i).Cpair3 = Cpair3;
-        %sanitydimer(i).JLR = JLR;
+        sanitydisc(i).th = tanh(h);
+        sanitydisc(i).tchk = tchk;
+        sanitydisc(i).mtchk = mean(tchk);
+        sanitydisc(i).mimj = mimj;
+        sanitydisc(i).chi = chi;
+        sanitydisc(i).Cij = Cij;
+        sanitydisc(i).mCij  = mCij;
+        sanitydisc(i).mfC = mfC;
+        sanitydisc(i).mfJ = Jmf;
+        sanitydisc(i).mfh = mfh;
+        sanitydisc(i).tapJ = Jtap;
+        sanitydisc(i).taph = htap;
+        %sanitydisc(i).tapC = Ctap;
+        sanitydisc(i).dmfC = dmfC;
+        %sanitydisc(i).dtapC = dtapC;
+        sanitydisc(i).dmfJ = dmfJ;
+        sanitydisc(i).dtapJ = dtapJ;
+        sanitydisc(i).dmfh = dmfh;
+        sanitydisc(i).dtaph = dtaph;
 
     end
-save([name,'\',time(1:5),'sanitydimer_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
-%%save(['sanitydimer_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
+
+
+save([name,'\',time(1:5),'sanitydisc_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydisc');
+%%save(['sanity_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+%%save(['sanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
 
 % Vestigial snips

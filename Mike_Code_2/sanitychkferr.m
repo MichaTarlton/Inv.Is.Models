@@ -1,4 +1,4 @@
-%%%sanitychkdimer.m
+%%%sanitychkferr.m
 
 %% Do sanity check, create clean inputs as defined by Yasser:
 				% `Your code should get connectivity matrix J and external field vector h. 
@@ -12,12 +12,12 @@
 
 
 
-function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
-   sanitydimer = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{},'Jpair',{},'hpair',{},'JLR',{},'Cpair3',{}); 
-                %struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'chi',{},'mchi',{},'saneh',{},'sanechi',{});
-
-      for i = 1:jn
-        J = JHstruct(i).Jsparse;
+function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
+   
+   sanityferr = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'mferr',{},'tapJ',{},'taph',{},'tapC',{});
+    
+   for i = 1:jn
+    	J = JHstruct(i).Jsparse;
         h = JHstruct(i).Hsparse;
         mi = Sstruct(i).mfinal;
         chi = Sstruct(i).Cfinal;
@@ -27,12 +27,14 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
         Cij = chi - mimj;
         mCij = mean(Cij,'all');
 
-            
+    %% Mean field methods
+    %% Forward
+
         % Check mags using MF method, eq. 51 berg, only if all values of J = 0 does this work
         % Removing for dimer check
         % actual equation is: mfmi = tanh(h + mi*J) fuck with this later
         % Roudi Check for disconnected (J=0) matrix
-        % tchk = tanh(h) - mi; 
+        tchk = tanh(h) - mi; 
        
     %%For nMF methods of Cij
 
@@ -44,6 +46,18 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
        % mkmj = mk'*mk;
        % mfchi = sisj - mkmj;
        % mfmchi = mean(mfchi,'all');
+
+    %% Ferr magnetization forward mean field method
+    % mferr = tanh((J.*mferr' + h)./(T1)) %From eq.3.36 in Amit
+    
+
+    N = length(h);
+    mferr = rand(1,N)';
+    for ii = 1:N
+        mferrnew = tanh((J.*0.3*mferr + h')./(1)); %Using T=1 per nicola's instruction also J=0.3
+        mferr = mferrnew;
+    end
+    disp(mferr')
     
     % eq 4.
     %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
@@ -53,91 +67,73 @@ function sanitydimer = sanitychkdimer(jn,Sstruct,JHstruct,sparsity,time,T,name)
 
     % eq 4b. Mean Field inferred Cij from roudi 2009
     % Taking difference of C arrays is stupid as one is a permutation of the other
-    mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    % mfC = diag(1-mi.^2) + (1-mi.^2)'.*J*Cij;
+    mfC = rand(N,N);
+    for iii = 1:N
+        mfCnew = diag(1-mferr.^2) + (1-mferr.^2)'.*J*mfC; %This isn't working but who cares rn
+        mfC = mfCnew;
+    end
+    disp(mfC)
         
     % Inferred J 
     Pij = diag(1-mi.^2);
-    Jmf = (Pij^-1) - (Cij^-1);
+    Jmf = (Pij^-1) - (Cij^-1); % using this for now as this seems closer to what I think it is
     % Jmf = (Pij^-1) - (mfC^-1); % Pretty certain this is wrongm the C from q 4 does not plug into the C %from eq 5
 
     % Inferred h mean field
     % Jmk = mi*J; % This is wrong this isn't inferred or forward. using the generated mag but the real J
     mfh = atanh(mi) - mi*Jmf; % and then the J here should be the inferred J
 
-    % Now do forward
-
-
+   
 
     %% TAP REconstruction
     Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
     
     %%  Forward Construction from J
+    % Ctap = (-J - 2.*(J.^2).*mimj)^-1;
     Ctap = (-J - 2.*(J.^2).*mimj)^-1;
 
-
-    %% Indie Pair Approximation for gas of dimers
-
-    Jpair = log(((1 + mi' + mi + chi).*(1 - mi' - mi + chi))./((1 - mi' + mi - chi).*(1 + mi' - mi - chi)))./4;
-    Jpair(~isfinite(Jpair)) = 0;
-
-    hpair = atanh(mi) - mi*Jpair; %reusing the nmf equation
-
-    % Forward for C and h = 0
-    % Cpair = (exp(4.*J) + 1 (+/-) 2exp(2.*J))./(exp(4.*J) - 1);
-    % Cpair1 = (exp(4.*J) + 1)./(exp(4.*J) - 1);
-    % Cpair2 = (exp(4.*J) + 1)./(exp(4.*J) - 1) - (2.*sqrt(exp(4.*J)))/abs(exp(4.*J)-1);
-    Cpair3 = tanh(J); % Nicola's suggested construction
-
-    % Wolfram Solution
-    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J<0
-    % C = (e^(4 J) + 1)/(e^(4 J) - 1) - (2 sqrt(e^(4 J)))/abs(-1 + e^(4 J)) and J>0
-
-
-
-
-    % JLR = log(1 + Cij./((1+mi).^2))./4;
-
+    
 
     %% differences between calculated and inferred
-        dmfC = abs(Cij(:) - mfC(:));
-        dtapC = abs(Cij(:) - Ctap(:));
-        dmfJ = abs(J(:) - Jmf(:));
-        dtapJ = abs(J(:) - Jtap(:));
-        dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
-        dtaph = abs(h(:) - htap(:)); 
+        %dmfC = abs(Cij(:) - mfC(:));
+        %dtapC = abs(Cij(:) - Ctap(:));
+        %dmfJ = abs(J(:) - Jmf(:));
+        %dtapJ = abs(J(:) - Jtap(:));
+        %dmfh = abs(h(:) - mfh(:)); % So normally we would take the difference of original h with MF h but haven't done te mfh yet, see notes above
+        %dtaph = abs(h(:) - htap(:)); 
 
 
-        sanitydimer(i).th = tanh(h);
-        %sanitydimer(i).tchk = tchk;
-        %sanitydimer(i).mtchk = mean(tchk);
-        sanitydimer(i).mimj = mimj;
-        sanitydimer(i).chi = chi;
-        sanitydimer(i).Cij = Cij;
-        sanitydimer(i).mCij  = mCij;
-        sanitydimer(i).mfC = mfC;
-        sanitydimer(i).mfJ = Jmf;
-        sanitydimer(i).mfh = mfh;
-        sanitydimer(i).tapJ = Jtap;
-        sanitydimer(i).taph = htap;
-        sanitydimer(i).tapC = Ctap;
-        sanitydimer(i).dmfC = dmfC;
-        sanitydimer(i).dtapC = dtapC;
-        sanitydimer(i).dmfJ = dmfJ;
-        sanitydimer(i).dtapJ = dtapJ;
-        sanitydimer(i).dmfh = dmfh;
-        sanitydimer(i).dtaph = dtaph;
-        sanitydimer(i).Jpair = Jpair;
-        sanitydimer(i).hpair = hpair;
-        %sanitydimer(i).Cpair1 = Cpair1;
-        %sanitydimer(i).Cpair2 = Cpair2;
-        sanitydimer(i).Cpair3 = Cpair3;
-        %sanitydimer(i).JLR = JLR;
+        sanityferr(i).th = tanh(h);
+        sanityferr(i).tchk = tchk;
+        sanityferr(i).mtchk = mean(tchk);
+        sanityferr(i).mimj = mimj;
+        sanityferr(i).chi = chi;
+        sanityferr(i).Cij = Cij;
+        sanityferr(i).mCij  = mCij;
+        sanityferr(i).mfC = mfC;
+        sanityferr(i).mfJ = Jmf;
+        sanityferr(i).mfh = mfh;
+        sanityferr(i).mferr = mferr;
+        sanityferr(i).tapJ = Jtap;
+        sanityferr(i).taph = htap;
+        sanityferr(i).tapC = Ctap;
+        %sanityferr(i).dmfC = dmfC;
+        %sanityferr(i).dtapC = dtapC;
+        %sanityferr(i).dmfJ = dmfJ;
+        %sanityferr(i).dtapJ = dtapJ;
+        %sanityferr(i).dmfh = dmfh;
+        %sanityferr(i).dtaph = dtaph;
 
     end
-save([name,'\',time(1:5),'sanitydimer_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitydimer');
-%%save(['sanitydimer_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanitydimer');
+
+
+save([name,'\',time(1:5),'sanityferr_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanityferr');
+%%save(['sanity_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
+%%save(['sanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end
+
 
 % Vestigial snips
 
