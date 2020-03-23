@@ -24,7 +24,9 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
         
     	if h_on == 1
 		%h = randn(1,N);
-		h = rand(1,N);
+		%h = rand(1,N);
+		%h = normrnd(0,1/4,[1,N]);
+		h = normrnd(0,1/8,[1,N]);
 		hsparse = h.*(double(rand(1,N)> sparsity));
 		JHnorm(i).Hfield = h;
 		JHnorm(i).Hsparse = hsparse;

@@ -48,12 +48,13 @@
 clear all;
 
 Tval = [1e3,1e4]; %| Presetting the T.calculation: 3*M(numel(M))
-Nval = [10,20,30,40,50];
+Nval = [100,200,300,400,500];
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
 
-jn = 1; %| Trials
+
+jn = 2; %| Trials
 sparsity = 0;
 h_on = 1; %% h field genereation
 

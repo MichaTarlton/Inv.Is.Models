@@ -30,7 +30,9 @@ function JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name)
 
     	% To sparsify all other H values, supressing for now
     	if i > 1 
-    		h = randn(1,N);
+    		%h = randn(1,N);
+    		%h = normrnd(0,1/4,[1,N]);
+    		h = normrnd(0,1/8,[1,N]);
 			hsparse = h.*(double(rand(1,N)> sparsity));
 			JHdiscon(i).Hfield = h;
 			JHdiscon(i).Hsparse = hsparse;

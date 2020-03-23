@@ -132,8 +132,8 @@ for iNp_inactive = 1:numel(vNp_inactive)			% Purpose of iNp_inactive creates num
 
         XX = Metropolis_Hasting(3*M(numel(M)),Nx,beta*W,beta*H,rep); % call to metropolis hasting function. Inputs the "3*M(numel(M))" is the , "Nx" is the
 
-        X = ones(M(numel(M)),Nx); 
-        Y = ones(M(numel(M)),1);
+        X = ones(M(numel(M)),Nx); %|For all the observations for all nodes
+        Y = ones(M(numel(M)),1); %|For one the observations for all nodes
         door = true;
 
         % the rank of the composite matrix has to be full rank

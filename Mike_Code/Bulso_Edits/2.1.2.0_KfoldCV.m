@@ -79,10 +79,12 @@ for ilam = 1:numel(vlambda)
       i_active = find(logical(modelL1));
       if sum(i_active)>0
         Xmodel = X_train(:,i_active); np = size(Xmodel,2);
+        
         f = @(x) logistic_likelihood(x,Xmodel,Y_train);
         x0 = zeros(1,np);
         x = fminunc(f,x0,options);
         w_inf = zeros(1,Np); w_inf(i_active) = x;
+        
       else
         w_inf = zeros(1,Np);
       end

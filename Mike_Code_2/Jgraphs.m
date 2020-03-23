@@ -5,9 +5,9 @@
 function JGraphs(JHstruct,sanity,N,T,name,time)%N,jn,h_on,sparsity,time,T,name)
 
 % First for Js
-Jy = [JHstruct.Jsparse];
-Jx1 = [sanity.mfJ]; %mean field
-Jx2 = [sanity.tapJ]; %tap
+Jy =  triu([JHstruct.Jsparse],1);
+Jx1 = triu([sanity.mfJ],1); %mean field
+Jx2 = triu([sanity.tapJ],1); %tap
 
 hy = [JHstruct.Hsparse];
 hx1 = [sanity.mfh]; %mean field
