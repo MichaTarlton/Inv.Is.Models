@@ -57,7 +57,7 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
         mferrnew = tanh((J.*0.3*mferr + h')./(1)); %Using T=1 per nicola's instruction also J=0.3
         mferr = mferrnew;
     end
-    disp(mferr')
+    %disp(mferr')
     
     % eq 4.
     %mfbCij = (1-mi.^2)'.*(eye(length(J)) + J*chi); %is it this, not likely says Nicola
@@ -73,7 +73,7 @@ function sanityferr = sanitychkferr(jn,Sstruct,JHstruct,sparsity,time,T,name)
         mfCnew = diag(1-mferr.^2) + (1-mferr.^2)'.*J*mfC; %This isn't working but who cares rn
         mfC = mfCnew;
     end
-    disp(mfC)
+    %disp(mfC)
         
     % Inferred J 
     Pij = diag(1-mi.^2);

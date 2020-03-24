@@ -47,8 +47,8 @@
 % Possibly add option for distribution chosen
 clear all;
 
-Tval = [1e3,1e4]; %| Presetting the T.calculation: 3*M(numel(M))
-Nval = [100,200,300,400,500];
+Tval = [1e4]; %| Presetting the T.calculation: 3*M(numel(M))
+Nval = [100];
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
@@ -121,7 +121,7 @@ Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time);
 Jgraphs(JHnorm,sanitynorm,N,T,name,time);
 Jgraphs(JHdiscon,sanitydisc,N,T,name,time);
 Jgraphs(JHdimer,sanitydimer,N,T,name,time);
-%Jgraphs(JHferr,sanityferr,N,T,name,time);
+Jgraphs(JHferr,sanityferr,N,T,name,time);
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat

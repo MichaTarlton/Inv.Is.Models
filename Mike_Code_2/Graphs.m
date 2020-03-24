@@ -2,12 +2,13 @@
 % For Correlation and magnetization sanity checks
 
 
-function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time)%N,jn,h_on,sparsity,time,T,name)
+%function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time)%N,jn,h_on,sparsity,time,T,name)
+function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,N,T,name,time) % Minus sanityferr
 
 mx = [SstructDisc.mfinal];
 my = [sanitydisc.th];
 fmx = [SstructFerr.mfinal];
-fmy = [sanityferr.th];
+%fmy = [sanityferr.th];
 mtchk=mean([sanitydisc.mtchk]);
 
 %h = figure;
