@@ -12,21 +12,20 @@
 
 
 
-function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,name)
+function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,N,name)
    
    sanitynorm = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
    for i = 1:jn
-    	J = JHstruct(i).Jsparse;
-        h = JHstruct(i).Hsparse;
-        mi = Sstruct(i).mfinal;
-        chi = Sstruct(i).Cfinal;
-        S = Sstruct(i).S_hat;
-
-        mimj = mi'*mi;
-        Cij = chi - mimj;
-        mCij = mean(Cij,'all');
-
+    	J   = JHstruct(i).Jsparse;
+        h   = JHstruct(i).Hsparse;
+        S   = Sstruct(i).S_hat;
+        mi  = Sstruct(i).mi;
+        mimj= Sstruct(i).mimj;
+        chi = Sstruct(i).chi;
+        Cij = Sstruct(i).Cij;
+        mCij= Sstruct(i).mCij;
+        
     %% Forward construction
     
     % nMF Construction
@@ -66,6 +65,37 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,name)
     Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
     htap = atan(mi') - Jtap*mi' + mi'.*(Jtap^2)*(1-mi'.^2); % need to review this formula carefully
 
+    %% PLLH nmF and TAP variants
+    for n = 1:length(Cij); 
+        
+        Cni = Cij; 
+        Cni(:,n) = [];
+        PLCstruct(n).Cnj = Cni;
+        Cni(n,:) = [];
+        PLCstruct(n).Cnij = Cni;
+        PLCstruct(n).Cninv = Cni^-1;
+
+    end
+
+    for j = 1:length(Cij);
+
+        Cplline = PLCstruct(j).Cnj(j,:)*PLCstruct(j).Cninv;
+        PLCstruct(j).Cplline = Cplline;
+        Jpre(j, :) = Cplline;
+    
+    end
+
+    plij = [1-mi.^2]';
+    PLCstruct(1).Jpre = plij.*Jpre; %| Storing Jpre and adding magnetizationg thingy
+    Jpl = [tril(Jpre,-1) zeros(N, 1)] + [zeros(N,1) triu(Jpre)]; %| This adds the diagonal of 0 
+    hpl = atanh(mi) - mi*Jpl;
+
+    % Not sure how to do the PL-TAP yet, according to nguyen apply the same expansion to eq. 57
+    %!!! THE FOLLOWING IS INCORRECT, BUT I AM CODING IT OUT AS IT"S BETTER THAN DOING NOTHING ATM
+    % nvm, not even that simple. leaving the copy of previous TAP equations here for future modification
+    %plJtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj)); 
+    %plhtap = atan(mi') - Jtap*mi' + mi'.*(Jtap^2)*(1-mi'.^2); 
+
 
     %% differences between calculated and inferred
         %dmfC = abs(Cij(:) - mfC(:));
@@ -84,11 +114,17 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,name)
         sanitynorm(i).Cij = Cij;
         sanitynorm(i).mCij  = mCij;
         %sanitynorm(i).mfC = mfC;
+
         sanitynorm(i).mfJ = Jmf;
         sanitynorm(i).mfh = mfh;
         sanitynorm(i).tapJ = Jtap;
         sanitynorm(i).taph = htap;
         sanitynorm(i).tapC = Ctap;
+        sanitynorm(i).plJmf = Jpl;
+        sanitynorm(i).plhmf = hpl;
+        %sanitynorm(i).plJtap = plJtap;
+        %sanitynorm(i).pltap = plhtap;
+
         %sanitynorm(i).dmfC = dmfC;
         sanitynorm(i).dtapC = dtapC;
         sanitynorm(i).dmfJ = dmfJ;

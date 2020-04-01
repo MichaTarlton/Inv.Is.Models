@@ -3,11 +3,11 @@
 
 
 %function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,sanityferr,N,T,name,time)%N,jn,h_on,sparsity,time,T,name)
-function Graphs(SstructDisc,SstructFerr,sanitydimer,sanitydisc,N,T,name,time) % Minus sanityferr
+function Graphs(SstructDisc,sanitydimer,sanitydisc,N,T,name,time) % Minus sanityferr
 
 mx = [SstructDisc.mfinal];
 my = [sanitydisc.th];
-fmx = [SstructFerr.mfinal];
+%fmx = [SstructFerr.mfinal];
 %fmy = [sanityferr.th];
 mtchk=mean([sanitydisc.mtchk]);
 

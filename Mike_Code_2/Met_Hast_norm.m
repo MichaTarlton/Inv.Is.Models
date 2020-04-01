@@ -13,7 +13,7 @@
 %% Outputs: 
 %			S_hat: The entire spike train, known as S_hat in Nicola's version
 %			mfinal: mfinal in Nicola code, final magnetizations
-%			Cfinal: final correlation matrix
+%			Cfinal: final correlation matrix | this is actually the CHi value
 % 		Need to create structs which allow recording of in between outputs for debugging purposes
 %		
 %% NOTES.
@@ -30,7 +30,7 @@ Int = 10*N; 				%steps interval between two different measurements (10 swips)
 Navg = T*Int;			%| end state number of iterations post equilibrium reached
 Energy = zeros(1,Nequil+Navg); 	%|
 
-SstructNorm = struct('S_hat',{},'mfinal',{},'Cfinal',{},'mequil',{},'Cequil',{});
+SstructNorm = struct('S_hat',{},'mi',{},'mimj',{},'chi',{},'Cij',{},'mCij',{},'mequil',{},'Cequil',{});
 
 
 for i = 1:jn
@@ -150,12 +150,21 @@ for i = 1:jn
 
 	%%%%%%%%%%%%%%%%%%% END OF LOOP AFTER EQUILIBRIUM %%%%%%%%%%%%%%%%%%%%%%%%
 	
+	mi 		= mean(S_hat);
+	mimj 	= mi'*mi;
+	chi 	= S_hat'*S_hat/T;
+    Cij 	= chi - mimj;
+    mCij 	= mean(Cij,'all');
+
 	% final estimates of magnetisation and correlation
-	SstructNorm(i).S_hat = S_hat;
-	SstructNorm(i).mfinal = mean(S_hat);
-	SstructNorm(i).Cfinal = S_hat'*S_hat/T;
-	SstructNorm(i).mequil = mean(S_eq);
-	SstructNorm(i).Cequil = S_eq'*S_eq/T;
+	SstructNorm(i).S_hat    = S_hat;
+	SstructNorm(i).mi   	= mi;
+	SstructNorm(i).mimj    	= mimj; 
+	SstructNorm(i).chi 		= chi;
+	SstructNorm(i).Cij   	= Cij;
+	SstructNorm(i).mCij 	= mCij; 
+	SstructNorm(i).mequil   = mean(S_eq);
+	SstructNorm(i).Chiequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
 	save([name,'\',time(1:5),'SstructNorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');

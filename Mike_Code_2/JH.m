@@ -4,7 +4,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
 	for i = 1:jn
 	%R = double(normrnd(0,1/N,[N,N]));
     %R = double(normrnd(0,1/nthroot(N,3),[N,N]));
-    R = double(normrnd(0,1/4,[N,N]));
+    R = double(normrnd(0,1./(2.*log(N)),[N,N]));
 
 	R = R - diag(diag(R));
     % R = R/sqrt(N/2); % Normalization, not sure what sorta normalization this should be, in Nicola's code it was dependent on size of N. Removing for now
@@ -26,7 +26,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
 		%h = randn(1,N);
 		%h = rand(1,N);
 		%h = normrnd(0,1/4,[1,N]);
-		h = normrnd(0,1/8,[1,N]);
+		h = normrnd(0,1/7,[1,N]);
 		hsparse = h.*(double(rand(1,N)> sparsity));
 		JHnorm(i).Hfield = h;
 		JHnorm(i).Hsparse = hsparse;

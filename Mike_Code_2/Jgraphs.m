@@ -8,13 +8,25 @@ JHstruct = JHstruct(1)
 sanity = sanity(1)
 
 % First for Js
-Jy =  triu([JHstruct.Jsparse],1);
-Jx1 = triu([sanity.mfJ],1); %mean field
-Jx2 = triu([sanity.tapJ],1); %tap
+% note that you can get rid of the  upper tri stuff now, also the brackets
+Jypre =  JHstruct.Jsparse;
+Jx1pre = sanity.mfJ; %mean field
+Jx2pre = sanity.tapJ; %tap
+Jx3pre = sanity.plJmf;
 
 hy = [JHstruct.Hsparse];
 hx1 = [sanity.mfh]; %mean field
 hx2 = [sanity.taph]; %tap
+hx3 = [sanity.plhmf];
+
+% to create vector out of upper triangle
+truth = triu(true(size(Jypre)),1)
+Jy  = Jypre(truth)
+Jx1 = Jx1pre(truth)
+Jx2 = Jx2pre(truth)
+Jx3 = Jx3pre(truth)
+
+randos = randperm(N^2/2-N/2,floor(N^2/3)) %| if this breaks, it's bc someone use an uneven N value
 
 sname = inputname(1);
 
@@ -38,38 +50,86 @@ else
 end
 
 h = figure;
-subplot(1,2,1)
-scatter(Jx1(:),Jy(:),[],'b')
+
+
+subplot(3,2,1)
+scatter(Jx1(randos),Jy(randos),1,'.','b')
+%scatter(Jx1(:),Jy(:),[],'.','b')
 axis([-1 1 -1 1])
 refline(1,0) 
+ylabel('nMF')
 hold on
-if ~strcmpi(sname, 'JHdimer')
-scatter(Jx2(:),Jy(:),[],'r')
-end
+title({'J values'})
+%if ~strcmpi(sname, 'JHdimer')
+%scatter(Jx2(randos),Jy(randos),1,'.','r')
+%end
 
-title({'J values: infered v real',['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
-xlabel(label)
-ylabel('Real')
+subplot(3,2,3)
+scatter(Jx2(randos),Jy(randos),1,'.','r')
+%scatter(Jx1(:),Jy(:),[],'.','b')
+axis([-1 1 -1 1])
+refline(1,0)
+ylabel('TAP') 
+hold on
+
+subplot(3,2,5)
+scatter(Jx3(randos),Jy(randos),1,'.','m')
+%scatter(Jx1(:),Jy(:),[],'.','b')
+axis([-1 1 -1 1])
+refline(1,0) 
+ylabel('PL-MF')
+hold on
+
+%title({'J values: infered v real',['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
+%xlabel(label)
+%ylabel('Real')
+
+
+
+
+
 
 %% For H values
 
-hy = [JHstruct.Hsparse];
-hx1 = [sanity.mfh]; %mean field
-hx2 = [sanity.taph]; %tap
-
 %figure
-subplot(1,2,2)
+subplot(3,2,2)
+
 scatter(hx1(:),hy(:),[],'b')
 axis([-1 1 -1 1])
 refline(1,0) 
 hold on
-if ~strcmpi(sname, 'JHdimer')
-scatter(hx2(:),hy(:),[],'r')
-end
-title({'h values: infered v real',['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
-xlabel(label)
-ylabel('Real')
-sgtitle(distname)
+title({'h values'})
+%if ~strcmpi(sname, 'JHdimer')
+%scatter(hx1(:),hy(:),[],'r')
+%end
+
+subplot(3,2,4)
+scatter(hx2(:),hy(:),[],'b')
+axis([-1 1 -1 1])
+refline(1,0) 
+hold on
+%if ~strcmpi(sname, 'JHdimer')
+%scatter(hx2(:),hy(:),[],'r')
+%end
+
+subplot(3,2,6)
+scatter(hx3(:),hy(:),[],'b')
+axis([-1 1 -1 1])
+refline(1,0) 
+hold on
+%if ~strcmpi(sname, 'JHdimer')
+%scatter(hx2(:),hy(:),[],'r')
+%end
+
+
+%title({'h values: infered v real',['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
+%xlabel(label)
+%ylabel('Real')
+sgtitle({distname,['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
+
+
+
+
 
 savefig(h,[name,'\',time(1:5),'JGraphs',sname,'_N',num2str(N),'_T1E',num2str(log10(T)),'_',time(6:12),'.fig'],'compact')
 saveas(h,[time(1:5),'JGraph',sname,'_N',num2str(N),'_T1E',num2str(log10(T)),'_',time(6:12),'.png'])
