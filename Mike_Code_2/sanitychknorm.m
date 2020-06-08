@@ -12,7 +12,7 @@
 
 
 
-function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,N,name)
+function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,N,lowdir,beta)
    
    sanitynorm = struct('th',{},'tchk',{},'mtchk',{},'mimj',{},'Cij',{},'mCij',{},'mfC',{},'mfJ',{},'mfh',{},'tapJ',{},'taph',{},'tapC',{});
     
@@ -63,7 +63,9 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,N,name)
 
     % TAP REconstruction
     Jtap = -2.*(Cij^-1)./(1 + sqrt(1-8.*(Cij^-1).*mimj));
-    htap = atan(mi') - Jtap*mi' + mi'.*(Jtap^2)*(1-mi'.^2); % need to review this formula carefully
+    Jtap = Jtap - diag(diag(Jtap)); %| Do we need to remove self-interactions? YES. Testing this does lead to a noticable difference in resultant htap
+    
+    htap = atanh(mi') - Jtap*mi' + mi'.*(Jtap.^2)*(1-mi'.^2); % need to review this formula carefully
 
     %% PLLH nmF and TAP variants
     for n = 1:length(Cij); 
@@ -135,7 +137,7 @@ function sanitynorm = sanitychknorm(jn,Sstruct,JHstruct,sparsity,time,T,N,name)
     end
 
 
-save([name,'\',time(1:5),'sanitynorm_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time(6:12),'.mat'],'sanitynorm');
+save([lowdir,'\',time(1:5),'sanitynorm_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'sanitynorm');
 %%save(['sanity_N',num2str(length(h)),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 %%save(['sanity_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',num2str(100*sparsity),'_',time,'.mat'],'sanity');
 end

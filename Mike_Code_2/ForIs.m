@@ -12,7 +12,7 @@
 %% Input:
 %	Nx: number of nodes
 %	T: number of observations or "columns"
-% 	h_on: external field, boolean, 
+% 	h_on: external field, boolean, [topdir,'\',betadir,'\',time(1:5),'JGraphs','_beta',num2str(beta),'_',method()jj,'_',time(6:12),'.png']
 %      Should be generated but likely we'll have it set to 0 mostly
 %		This input is an on/of deciding whether or not one will be generated	
 %
@@ -47,20 +47,40 @@
 % Possibly add option for distribution chosen
 clear all;
 
- Tval = [1e3]; %| Presetting the T.calculation: 3*M(numel(M))
- Nval = [10];
- %Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
- %Nval = [30,40,50,100,200,300];
+Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
+Nval = [50,100,150];
+
+%Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
+%Nval = [50,100,300];
+
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
-
-
+%betavec = [0.1]; 
+betavec = [0.4,0.9,1.4]; 
 jn = 1; %| Trials
 sparsity = 0;
 h_on = 1; %% h field genereation
+cd('E:\GitHub\Inv.Is.Models\Mike_Code_2'); %Only for my particular instance
 
 time = datestr(now,'HHMM-ddmmmyy');
+mkdir(cd,time);
+cd(time);
+topdir = cd;
+
+for Bi = 3:length(betavec)
+	cd(topdir)
+
+	beta = betavec(Bi);
+
+	betadir = ['Beta_',num2str(beta)];
+	mkdir(cd,betadir);
+	cd(betadir)
+
+
+Snamevec = {};
+
+AllStruct = struct;
 
 for Ti = 1:length(Tval)
     T = Tval(Ti);
@@ -68,9 +88,17 @@ for Ti = 1:length(Tval)
 for Ni = 1:length(Nval)
     N = Nval(Ni);
     
-name = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12)];
-mkdir(cd,name);
-save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
+lowdir = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12)];
+mkdir(cd,lowdir);
+save([lowdir,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'T','N','jn','sparsity','h_on','time','-v7.3');
+
+name = ['N',num2str(N),'T1E',num2str(log10(T))];
+
+AllStruct.(name) = {};
+AllStruct.(name).name = name;
+AllStruct.(name).T = T;
+AllStruct.(name).N = N;
+
 
 %%%  Part 1, generate coupling matricies and h field
 %% Gaussian Dist
@@ -80,35 +108,52 @@ save([name,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_tr
 % Sparsity setting is set from inside JH fnc currently
 
 
-JHnorm = JH(N,jn,h_on,sparsity,time,T,name);
-%JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name); %for disconnected J
-%JHdimer = JD(N,jn,h_on,sparsity,time,T,name); 	%for dimers
-%JHferr = JF(N,jn,h_on,sparsity,time,T,name); 	%for ferromagnetic lattice
+JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta);
+AllStruct.(name).Jtru = JHnorm.Jsparse;
+AllStruct.(name).htru = JHnorm.Hsparse;
+
+JHdiscon = JHs(N,jn,h_on,sparsity,time,T,lowdir); %for disconnected J
+JHdimer = JD(N,jn,h_on,sparsity,time,T,lowdir); 	%for dimers
+%JHferr = JF(N,jn,h_on,sparsity,time,T,lowdir); 	%for ferromagnetic lattice
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
 %% 2.1 Generate courrelation and magnetization from field
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
+SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,lowdir,beta);
+AllStruct.(name).S = SstructNorm.S_hat';
 
-SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,name);
-%SstructDisc = Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,name);
-%SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,name);
-%SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,name);
+SstructDisc =  Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,lowdir,beta);
+SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,lowdir,beta);
+%SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,lowdir);
 
-LLH = MSLR(N,h_on,T,SstructNorm);
+%LLH = MSLR(N,h_on,T,SstructNorm);
 
 
 %%% Part ??? SANITY CHECK
 
-sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,N,name);
-%sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,name);
-%sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,name);
-%sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,name);
+sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,N,lowdir,beta);
+AllStruct.(name).Jmf = sanitynorm.mfJ;
+AllStruct.(name).hmf = sanitynorm.mfh;
+AllStruct.(name).Jtap	=	sanitynorm.tapJ;
+AllStruct.(name).htap	=	sanitynorm.taph;
+AllStruct.(name).Jplmf	=	sanitynorm.plJmf;
+AllStruct.(name).hplmf	=	sanitynorm.plhmf;
 
-%diffchkstruct = diffchk(jn,N,T,sparsity,time,sanityorm,sanitydimer,sanitydisc,sanityferr,name)
+sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,lowdir);
+sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,lowdir);
+%sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,lowdir);
 
-%% Saving stuff
+%diffchkstruct = diffchk(jn,N,T,sparsity,time,sanitynorm,sanitydimer,sanitydisc,sanityferr,lowdir);
+
+%% PLLH from Ezaki
+% woven into main loop instead of being an add-on like below
+PLLHout = pfunc_02_Inferrer_PL(SstructNorm.S_hat',name,time,beta);
+AllStruct.(name).Jpllh = PLLHout.J;
+AllStruct.(name).hpllh = PLLHout.h';
+
+
 
 
 
@@ -116,17 +161,19 @@ sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,N,name);
 %% Plot
 % Probably could break this out into a side thing
 
-%Graphs(SstructDisc,sanitydimer,sanitydisc,N,T,name,time);
+Graphs(SstructDisc,sanitydimer,sanitydisc,N,T,lowdir,time);
 
 %Graphs(SstructNorm,sanitynorm,N,T,'Normal Distribution')
 %Graphs(SstructDisc,sanitydisc,N,T,'Disconnected')
 %Graphs(SstructDimer,sanitydimer,N,T,'Independent Pairs')
 %Graphs(SstructFerr,sanityferr,N,T,'Ferromagnetic')
 
-Jgraphs(JHnorm,sanitynorm,N,T,name,time);
-%Jgraphs(JHdiscon,sanitydisc,N,T,name,time);
-%Jgraphs(JHdimer,sanitydimer,N,T,name,time);
-%Jgraphs(JHferr,sanityferr,N,T,name,time);
+%Jgraphs(JHnorm,sanitynorm,N,T,lowdir,time);
+% Jgraphs(JHdiscon,sanitydisc,N,T,lowdir,time);
+% Jgraphs(JHdimer,sanitydimer,N,T,lowdir,time);
+%Jgraphs(JHferr,sanityferr,N,T,lowdir,time);
+
+
 
 %%%Part 3 (This is actuall part inference)
 %% Create array X to regress on Y out of sampled s vectors from S_hat
@@ -135,5 +182,25 @@ Jgraphs(JHnorm,sanitynorm,N,T,name,time);
 
 %% Actually built some analtic infferrence methods into the sanit checks
 
+Snamevec = {Snamevec,name};
 end
+end
+
+
+
+Jstor = JGraphs3(AllStruct,time,Snamevec,beta,topdir,betadir,Tval,Nval);
+
+%% PLLH from Ezaki
+% this is temporary and should be done away with into it's own script
+% Sstructvec = [SN50T3,SN50T4,SN50T5,SN100T3,SN100T4,SN100T5,SN300T3,SN300T4,SN300T5];
+% Snamevec = ["SN50T3","SN50T4","SN50T5","SN100T3","SN100T4","SN100T5","SN300T3","SN300T4","SN300T5"];
+% 
+% PLLHout = Max_edits_pfunc_02_Inferrer_PL(Sstructvec,Snamevec,lowdir,time,beta);
+
+% Jstor = JGraphs2(JHN50T3,JHN50T4,JHN50T5,JHN100T3,JHN100T4,JHN100T5,JHN300T3,JHN300T4,JHN300T5,...
+%     sanityN50T3,sanityN50T4,sanityN50T5,sanityN100T3,sanityN100T4,sanityN100T5,sanityN300T3,sanityN300T4,sanityN300T5,...
+%     PLLH,...
+%     time,name,beta)
+
+
 end

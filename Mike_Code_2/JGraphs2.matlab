@@ -55,9 +55,8 @@ h = figure;
 subplot(3,2,1)
 scatter(Jx1(randos),Jy(randos),1,'.','b')
 %scatter(Jx1(:),Jy(:),[],'.','b')
-%axis([-1 1 -1 1])
+axis([-1 1 -1 1])
 refline(1,0) 
-refline
 ylabel('nMF')
 hold on
 title({'J values'})
@@ -68,8 +67,7 @@ title({'J values'})
 subplot(3,2,3)
 scatter(Jx2(randos),Jy(randos),1,'.','r')
 %scatter(Jx1(:),Jy(:),[],'.','b')
-%axis([-1 1 -1 1])
-refline
+axis([-1 1 -1 1])
 refline(1,0)
 ylabel('TAP') 
 hold on
@@ -77,8 +75,7 @@ hold on
 subplot(3,2,5)
 scatter(Jx3(randos),Jy(randos),1,'.','m')
 %scatter(Jx1(:),Jy(:),[],'.','b')
-%axis([-1 1 -1 1])
-refline
+axis([-1 1 -1 1])
 refline(1,0) 
 ylabel('PL-MF')
 hold on
@@ -98,8 +95,7 @@ hold on
 subplot(3,2,2)
 
 scatter(hx1(:),hy(:),[],'b')
-%axis([-1 1 -1 1])
-refline
+axis([-1 1 -1 1])
 refline(1,0) 
 hold on
 title({'h values'})
@@ -109,8 +105,7 @@ title({'h values'})
 
 subplot(3,2,4)
 scatter(hx2(:),hy(:),[],'b')
-%axis([-1 1 -1 1])
-refline
+axis([-1 1 -1 1])
 refline(1,0) 
 hold on
 %if ~strcmpi(sname, 'JHdimer')
@@ -119,8 +114,7 @@ hold on
 
 subplot(3,2,6)
 scatter(hx3(:),hy(:),[],'b')
-%axis([-1 1 -1 1])
-refline
+axis([-1 1 -1 1])
 refline(1,0) 
 hold on
 %if ~strcmpi(sname, 'JHdimer')
@@ -130,11 +124,10 @@ sgtitle({distname,['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
 
 figure 
 title({'Comparison of J values'})
-scatter(Jx1(randos),Jx2(randos),10,'b','.')
+scatter(Jx1(randos),Jx2(randos),10,'.','b')
 hold on
-scatter(Jx1(randos),Jx3(randos),10,'r','o')
-hold on
-scatter(Jx2(randos),Jx3(randos),10,'m','d')
+scatter(Jx1(randos),Jx3(randos),10,'o','r')
+scatter(Jx2(randos),Jx3(randos),10,'d','m')
 refline(1,0)
 
 %title({'h values: infered v real',['N = ',num2str(N)],['T = 1E',num2str(log10(T))]})
