@@ -122,7 +122,7 @@ JHdimer = JD(N,jn,h_on,sparsity,time,T,lowdir); 	%for dimers
 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
 
 SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,lowdir,beta);
-AllStruct.(name).S = SstructNorm.S_hat';
+AllStruct.(name).S = SstructNorm.S_hat'; % ' %| Adding a fucking ' here so sublime doesn'tlose it's shit % 
 
 SstructDisc =  Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,lowdir,beta);
 SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,lowdir,beta);
@@ -153,7 +153,7 @@ PLLHout = pfunc_02_Inferrer_PL(SstructNorm.S_hat',name,time,beta);
 AllStruct.(name).Jpllh = PLLHout.J;
 AllStruct.(name).hpllh = PLLHout.h';
 
-
+save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
 
 
 
