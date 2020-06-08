@@ -21,7 +21,7 @@
 %
 %
 
-function SstructNorm = Met_Hast_norm(T,N,jn,JHstruct,sparsity,time,name)
+function SstructNorm = Met_Hast_norm(T,N,jn,JHstruct,sparsity,time,lowdir,beta)
 
 	
 % initial settings, copied wholesale from Nicola
@@ -167,7 +167,7 @@ for i = 1:jn
 	SstructNorm(i).Chiequil = S_eq'*S_eq/T;
     
     disp(['Saving ',num2str(i)])
-	save([name,'\',time(1:5),'SstructNorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');
+	save([lowdir,'\',time(1:5),'SstructNorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');
 	disp(['End Normal S run ',num2str(i)])
 end
 

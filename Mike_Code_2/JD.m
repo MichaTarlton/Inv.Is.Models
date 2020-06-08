@@ -8,7 +8,9 @@ function JHdimer = JD(N,jn,h_on,sparsity,time,T,name)
 
 		R = eye(N);
 		%R = eye(N).*double(normrnd(0,1/N,[N,N]));
-        R = eye(N).*double(normrnd(0,1/4,[N,N]));
+        %R = eye(N).*double(normrnd(0,1/4,[N,N]));
+        beta = 0.1; %|Externalize this
+    	R = double(normrnd(0,beta./sqrt(N),[N,N])); %| the std deviation as suggested by nicola here is based on the SK model which I need to figure the fuck out
 		%R = R/sqrt(N/2); %|normalization useless for our purposes
 		R2 = R(:,randperm(N)); %|Randomly sorts our columns
 		R3 = triu(R2,1)+triu(R2,1)'; % Removes diagonal

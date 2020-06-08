@@ -15,8 +15,10 @@
 function JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHdiscon = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
-
+ 	beta = 0.1; %|Externalize this
+    
  		for i = 1:jn
+
 	R3 = zeros(N,N);
         
     	if h_on == 1
@@ -32,7 +34,9 @@ function JHdiscon = JHs(N,jn,h_on,sparsity,time,T,name)
     	if i > 1 
     		%h = randn(1,N);
     		%h = normrnd(0,1/4,[1,N]);
-    		h = normrnd(0,1/8,[1,N]);
+    		%h = normrnd(0,1/8,[1,N]);
+    		%h = (-0.3*beta) + (0.6*beta)*rand(1,N)  %|Uniform distribution on range [-0.3*beta, 0.3*beta]
+    		h = normrnd(0,beta./sqrt(N),[1,N]); %| the std deviation as suggested by nicola here is based on the SK model which I need to figure the fuck out
 			hsparse = h.*(double(rand(1,N)> sparsity));
 			JHdiscon(i).Hfield = h;
 			JHdiscon(i).Hsparse = hsparse;

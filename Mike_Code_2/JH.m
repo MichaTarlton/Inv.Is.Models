@@ -1,10 +1,12 @@
-function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
+function JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
  	JHnorm = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
 	for i = 1:jn
 	%R = double(normrnd(0,1/N,[N,N]));
     %R = double(normrnd(0,1/nthroot(N,3),[N,N]));
-    R = double(normrnd(0,1./(2.*log(N)),[N,N]));
+    %R = double(normrnd(0,1./(2.*log(N)),[N,N]));
+    %beta = 0.2; %|Externalize this
+    R = double(normrnd(0,beta./sqrt(N),[N,N])); %| the std deviation as suggested by nicola here is based on the SK model which I need to figure the fuck out
 
 	R = R - diag(diag(R));
     % R = R/sqrt(N/2); % Normalization, not sure what sorta normalization this should be, in Nicola's code it was dependent on size of N. Removing for now
@@ -26,7 +28,9 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
 		%h = randn(1,N);
 		%h = rand(1,N);
 		%h = normrnd(0,1/4,[1,N]);
-		h = normrnd(0,1/7,[1,N]);
+		%h = normrnd(0,1/7,[1,N]);
+		%h = (-0.3*beta) + (0.6*beta)*rand(1,N)  %|Uniform distribution on range [-0.3*beta, 0.3*beta]
+		h = normrnd(0,beta./sqrt(N),[1,N]);
 		hsparse = h.*(double(rand(1,N)> sparsity));
 		JHnorm(i).Hfield = h;
 		JHnorm(i).Hsparse = hsparse;
@@ -38,7 +42,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,name)
 	JHnorm(i).Jgaus = R3;
 	JHnorm(i).Jsparse =  R3s;
 
-save([name,'\',time(1:5),'JHnorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(100*sparsity),'_',time(6:12),'.mat'],'JHnorm');	
+save([lowdir,'\',time(1:5),'JHnorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(beta),'_',time(6:12),'.mat'],'JHnorm');	
 
 disp(['End JH Normal run ',num2str(i)]) % Current sate output
 
