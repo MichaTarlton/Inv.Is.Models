@@ -25,6 +25,7 @@ function [l,Dl,DDl,J,h] = Pseudo_LLH(T,S) %|Old Log_LLH
 %Assuming S:(NxT)
 
 syms J h % Not certain if I should make this a symbolic function here or not
+		% Not. I need t spit this out into different parts and exterior and interior.
 
 % Attempting to do something more like how Nicola did it where the sums are just baked into the array multiplication
 % This doesn't work though due to how it effectively moves the sum(mu)
