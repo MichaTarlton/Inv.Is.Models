@@ -47,8 +47,8 @@
 % Possibly add option for distribution chosen
 clear all;
 
-Tval = [1e3];
-Nval = [30];
+Tval = [1e2,1e3];
+Nval = [30,40];
 
 %Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
 %Nval = [50,100,150];
@@ -59,7 +59,7 @@ Nval = [30];
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
-betavec = [0.4]; 
+betavec = [0.4,0.9]; 
 %betavec = [0.4,0.9,1.4]; 
 jn = 1; %| Trials
 sparsity = 0;
@@ -163,7 +163,7 @@ LLH = BLLH(T,N,h_on,AllStruct.(name).S);
 
 AllStruct.(name).BLLH = LLH;
 
-
+save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
 
 
 
@@ -195,7 +195,7 @@ AllStruct.(name).BLLH = LLH;
 Snamevec = {Snamevec,name};
 end
 end
-save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
+
 
 
 %Jstor = JGraphs3(AllStruct,time,Snamevec,beta,topdir,betadir,Tval,Nval);
