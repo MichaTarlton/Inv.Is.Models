@@ -1,6 +1,6 @@
 % Inputs 
 % Couplings: he said to do the delta func so set to 2
-% J0: the mean, set to one, not 0. THe way he has this is kinda weird. Like, it doesn't actually appear to be the mean.
+% J0: the mean, set to one, not 
 % sigJ: std dev | I used the SK model deviation: beta./sqrt(N)
 %		This can't be right tho.
 % Adj: topology as given by set_topolgy.m

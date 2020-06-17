@@ -47,10 +47,10 @@
 % Possibly add option for distribution chosen
 clear all;
 
-Tval = [1e2,1e3];
-Nval = [30,40];
+%Tval = [1e3];
+Nval = [30];
 
-%Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
+Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
 %Nval = [50,100,150];
 
 %Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
@@ -59,7 +59,7 @@ Nval = [30,40];
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
-betavec = [0.4,0.9]; 
+betavec = [0.4]; 
 %betavec = [0.4,0.9,1.4]; 
 jn = 1; %| Trials
 sparsity = 0;
@@ -112,13 +112,48 @@ AllStruct.(name).N = N;
 % Sparsity setting is set from inside JH fnc currently
 
 
-JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta);
-AllStruct.(name).Jtru = JHnorm.Jsparse;
-AllStruct.(name).htru = JHnorm.Hsparse;
+%JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta);
+% AllStruct.(name).Jtru = JHnorm.Jsparse;
+% AllStruct.(name).htru = JHnorm.Hsparse;
 
 %JHdiscon = JHs(N,jn,h_on,sparsity,time,T,lowdir); %for disconnected J
 %JHdimer = JD(N,jn,h_on,sparsity,time,T,lowdir); 	%for dimers
 %JHferr = JF(N,jn,h_on,sparsity,time,T,lowdir); 	%for ferromagnetic lattice
+
+
+%% Additional topologies via Nicola
+%% Maybe put this in it's own container
+% topo_on = 1;			% Turns on this module for parts below
+% 		topology = 1;  	%---cayley tree with coordination number c 
+% 		topology = 2;  	%---fully connected topology 
+% 		topology = 3;  	%---indipendent pair topology
+% 		topology = 4;  	%---2D Ising lattice 
+ 	topology = 5;  		%---Erdos Reyni random graph 
+% 		topology = 6;  	%--- Star network
+	c = 3; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
+ 	couplings = 1;		%---Gaussian  
+% 		couplings = 2	%---Delta Function 
+% 		couplings = 3	%---Double Delta Function. on average have the same amount of +/-1 values and will make sure all the same weight values
+	J0 = 1; 				%---"The Mean" but not exactly clear what it actually is. Keep at 1 for now
+	sigJ = beta./sqrt(N);%---stddev | I used the SK model deviation: beta./sqrt(N) . probably not right, but Nicola was alright with it.
+
+	Adj = set_topology(topology,N,c);
+   	Jtopo = set_couplings(couplings,beta,J0,sigJ,Adj);
+
+JHnorm.Jsparse = Jtopo; 	% replaces the used J graph if we want to use this topology
+JHnorm.Hsparse = 0.4 .* ones(1,N);		% Nicola recommends using fixed h for these. iirc setting it too high fucked it up
+
+AllStruct.(name).Jcontru = Adj;
+AllStruct.(name).Jtru = Jtopo;
+AllStruct.(name).htru = JHnorm.Hsparse;
+
+AllStruct.(name).couplings = couplings;
+AllStruct.(name).topology =  topology;
+AllStruct.(name).c = c;
+
+
+
+
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -157,13 +192,17 @@ AllStruct.(name).S = SstructNorm.S_hat'; % ' %| Adding a fucking ' here so subli
 %AllStruct.(name).Jpllh = PLLHout.J;
 %AllStruct.(name).hpllh = PLLHout.h';
 
+
+%% Bulso Likelihood Estimator 
 % create For loop for each observation step against all others
 % no actually put it in it's own conatiner
 LLH = BLLH(T,N,h_on,AllStruct.(name).S);
 
 AllStruct.(name).BLLH = LLH;
 
-save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
+AllStruct.(name).conerr = sum(double(not((LLH(1).Jcon - Adj) == 0)),'all');
+
+
 
 
 
@@ -195,7 +234,7 @@ save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_t
 Snamevec = {Snamevec,name};
 end
 end
-
+save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
 
 
 %Jstor = JGraphs3(AllStruct,time,Snamevec,beta,topdir,betadir,Tval,Nval);

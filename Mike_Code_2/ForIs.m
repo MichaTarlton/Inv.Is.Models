@@ -47,10 +47,10 @@
 % Possibly add option for distribution chosen
 clear all;
 
-Tval = [1e3];
+%Tval = [1e3];
 Nval = [30];
 
-%Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
+Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
 %Nval = [50,100,150];
 
 %Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
@@ -112,13 +112,48 @@ AllStruct.(name).N = N;
 % Sparsity setting is set from inside JH fnc currently
 
 
-JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta);
-AllStruct.(name).Jtru = JHnorm.Jsparse;
-AllStruct.(name).htru = JHnorm.Hsparse;
+%JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta);
+% AllStruct.(name).Jtru = JHnorm.Jsparse;
+% AllStruct.(name).htru = JHnorm.Hsparse;
 
 %JHdiscon = JHs(N,jn,h_on,sparsity,time,T,lowdir); %for disconnected J
 %JHdimer = JD(N,jn,h_on,sparsity,time,T,lowdir); 	%for dimers
 %JHferr = JF(N,jn,h_on,sparsity,time,T,lowdir); 	%for ferromagnetic lattice
+
+
+%% Additional topologies via Nicola
+%% Maybe put this in it's own container
+% topo_on = 1;			% Turns on this module for parts below
+% 		topology = 1;  	%---cayley tree with coordination number c 
+% 		topology = 2;  	%---fully connected topology 
+% 		topology = 3;  	%---indipendent pair topology
+% 		topology = 4;  	%---2D Ising lattice 
+ 	topology = 5;  		%---Erdos Reyni random graph 
+% 		topology = 6;  	%--- Star network
+	c = 3; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
+ 	couplings = 1;		%---Gaussian  
+% 		couplings = 2	%---Delta Function 
+% 		couplings = 3	%---Double Delta Function. on average have the same amount of +/-1 values and will make sure all the same weight values
+	J0 = 1; 				%---"The Mean" but not exactly clear what it actually is. Keep at 1 for now
+	sigJ = beta./sqrt(N);%---stddev | I used the SK model deviation: beta./sqrt(N) . probably not right, but Nicola was alright with it.
+
+	Adj = set_topology(topology,N,c);
+   	Jtopo = set_couplings(couplings,beta,J0,sigJ,Adj);
+
+JHnorm.Jsparse = Jtopo; 	% replaces the used J graph if we want to use this topology
+JHnorm.Hsparse = 0.4 .* ones(1,N);		% Nicola recommends using fixed h for these. iirc setting it too high fucked it up
+
+AllStruct.(name).Jcontru = Adj;
+AllStruct.(name).Jtru = Jtopo;
+AllStruct.(name).htru = JHnorm.Hsparse;
+
+AllStruct.(name).couplings = couplings;
+AllStruct.(name).topology =  topology;
+AllStruct.(name).c = c;
+
+
+
+
 
 
 %%% Part 2, generate samples (or spike train) S_hat, first using Met_Hast, then using Mean_Field
@@ -132,7 +167,6 @@ AllStruct.(name).S = SstructNorm.S_hat'; % ' %| Adding a fucking ' here so subli
 %SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,lowdir,beta);
 %SstructFerr = Met_Hast_F(T,N,jn,JHferr,sparsity,time,lowdir);
 
-%LLH = MSLR(N,h_on,T,SstructNorm);
 
 
 %%% Part ??? SANITY CHECK
@@ -149,19 +183,21 @@ AllStruct.(name).S = SstructNorm.S_hat'; % ' %| Adding a fucking ' here so subli
 %sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,lowdir);
 %sanityferr = sanitychkferr(jn,SstructFerr,JHferr,sparsity,time,T,lowdir);
 
-%diffchkstruct = diffchk(jn,N,T,sparsity,time,sanitynorm,sanitydimer,sanitydisc,sanityferr,lowdir);
-
 %% PLLH from Ezaki
 % woven into main loop instead of being an add-on like below
 %PLLHout = pfunc_02_Inferrer_PL(SstructNorm.S_hat',name,time,beta);
 %AllStruct.(name).Jpllh = PLLHout.J;
 %AllStruct.(name).hpllh = PLLHout.h';
 
+
+%% Bulso Likelihood Estimator 
 % create For loop for each observation step against all others
 % no actually put it in it's own conatiner
 LLH = BLLH(T,N,h_on,AllStruct.(name).S);
 
 AllStruct.(name).BLLH = LLH;
+
+AllStruct.(name).conerr = sum(double(not((LLH(1).Jcon - Adj) == 0)),'all');
 
 
 
@@ -169,6 +205,9 @@ AllStruct.(name).BLLH = LLH;
 
 
 %% Plot
+
+% Check to see if either of these two funcs are needed
+
 % Probably could break this out into a side thing
 
 %Graphs(SstructDisc,sanitydimer,sanitydisc,N,T,lowdir,time);
@@ -201,6 +240,7 @@ save([lowdir,'\',time(1:5),'AllStruct_N',num2str(N),'_T1E',num2str(log10(T)),'_t
 %Jstor = JGraphs3(AllStruct,time,Snamevec,beta,topdir,betadir,Tval,Nval);
 
 %% PLLH from Ezaki
+% This has been incorporated above, this can probably be removed
 % this is temporary and should be done away with into it's own script
 % Sstructvec = [SN50T3,SN50T4,SN50T5,SN100T3,SN100T4,SN100T5,SN300T3,SN300T4,SN300T5];
 % Snamevec = ["SN50T3","SN50T4","SN50T5","SN100T3","SN100T4","SN100T5","SN300T3","SN300T4","SN300T5"];
