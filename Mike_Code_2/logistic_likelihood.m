@@ -19,8 +19,8 @@ X = [ones(M,1),X];
 end
 
 %if M >= 1e5
-	X = sparse(X); % fucking around with sparse matricies to get around memory limitations, chuck out as soon as things begin to fail
-	Y = sparse(Y); % fucking around with sparse matricies to get around memory limitations, chuck out as soon as things begin to fail
+	%X = sparse(X); % fucking around with sparse matricies to get around memory limitations, chuck out as soon as things begin to fail
+	%Y = sparse(Y); % fucking around with sparse matricies to get around memory limitations, chuck out as soon as things begin to fail
 %	% appears to work leaving for now, no not especially. Actually seems very slow.
 %end
 
@@ -33,6 +33,6 @@ l = - m*w' + sum(log(2*cosh(w*X')))/M;
 Dl = - m + tanh(w*X')*X/M;
 
 % hessian of the likelihood function
-DDl = X'*diag(cosh(w*X').^(-2))*X/M;
+%DDl = X'*diag(cosh(w*X').^(-2))*X/M;
 
 end

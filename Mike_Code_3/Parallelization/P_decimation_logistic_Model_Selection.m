@@ -113,13 +113,21 @@ UniquePat = zeros(Np+1,1); %patterns equals within parity operation are consider
 np = zeros(Np+1,1);
 
 % Cycle over all Np+1 models
-%parfor i_model = 1:Np
-for i_model = 1:Np   
+parfor i_model = 1:Np
+% for i_model = 1:Np   
     % model index
     %disp(model(i_model,:))
     
+
+    %Parrallelization bullshit delete me
+    model2 = ones(Np+1,Np);
+    % ok this doesn't seem to work because of how the Model variable is called
+    % abandoning
+
+
+
     % see which parameters are 'on' in the current model
-    i = logical(model(i_model,:));
+    i = logical(model2(i_model,:));
     
     % store number of parameters
     np(i_model) = sum(i);

@@ -36,8 +36,13 @@ SstructNorm = struct('S_hat',{},'mi',{},'mimj',{},'chi',{},'Cij',{},'mCij',{},'m
 for i = 1:jn
 
 	% Set J and H from JHstruct
-	J =JHstruct(i).Jsparse;
-	h = JHstruct(i).Hsparse;
+	% J =JHstruct(i).Jsparse;
+	% h = JHstruct(i).Hsparse;
+
+	% for bulso topologies
+	J = JHstruct.Jtopo{1, i};
+	h = JHstruct.Htopo;
+	
 		
 	% initial configuration & representation 
 	S = double(rand(1,N) > 0.5);

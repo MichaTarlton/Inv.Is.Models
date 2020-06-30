@@ -1,6 +1,6 @@
 function JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta)
    %JHstruct = struct('Jgaus',{},'Hfield',{});
- 	JHnorm = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{});
+ 	JHnorm = struct('Jgaus',{},'Jsparse',{},'Hfield',{},'Hsparse',{},'Jcon',{},'Jsparse2',{});
 	for i = 1:jn
 	%R = double(normrnd(0,1/N,[N,N]));
     %R = double(normrnd(0,1/nthroot(N,3),[N,N]));
@@ -23,7 +23,8 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta)
 	spars = double(rand(N)> sparsity);
 	R2s = triu(R.*spars,1);
     R3s = R2s + triu(R2s)';			% decimates random values of vector of connection values, not exactly certain how yet. Not sure why using randperm
-        
+    Rcon = double(R3s >= beta./sqrt(N));
+
     	if h_on == 1
 		%h = randn(1,N);
 		%h = rand(1,N);
@@ -41,6 +42,10 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta)
 
 	JHnorm(i).Jgaus = R3;
 	JHnorm(i).Jsparse =  R3s;
+	%JHnorm(i).Jcon =  double(R3s ~= 0)); % adding for topology reconstruction
+	JHnorm(i).Jcon =  Rcon  % for only connections greater than particular std deviation given
+	JHnorm(i).Jsparse2 =  R3s.*Rcon;
+
 
 save([lowdir,'\',time(1:5),'JHnorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_sprs',num2str(beta),'_',time(6:12),'.mat'],'JHnorm');	
 
