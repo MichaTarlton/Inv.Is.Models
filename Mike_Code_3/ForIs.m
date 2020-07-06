@@ -67,7 +67,7 @@ h_on = 1; %% h field genereation
 
 cd('E:\GitHub\Inv.Is.Models\Mike_Code_3'); %Only for my particular instance
 
-time = datestr(now,'HHMM-ddmmmyy');
+time = datestr(now,'HHMM-ddmmmyy'); 
 mkdir(cd,time);
 cd(time);
 topdir = cd;

@@ -4,7 +4,7 @@
 % h_on,used for field variaable to include h value
 
 
-function LLH = BLLH(T,N,h_on,SStruct)
+function LLH = BLLH(T,N,h_on,SStruct,Adjset)
 
 LLH = struct('NodeModel',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym',{},'symrate',{},'asymrate',{});
 
@@ -167,10 +167,42 @@ LLH(st).asymrate.MDLent   = sum(double(LLH(st).Jasym.MDLent   == 1),'all');
 LLH(st).asymrate.MDLcount = sum(double(LLH(st).Jasym.MDLcount == 1),'all');
 %LLH(st).asymrate = sum(double(LLH(1).Jasym == 1),'all');
 
-%Tru positives
+% For finding connection error rates 
+% Perhaps should incorporate back into BLLH
+% totconerr: total error in infer connections
+% fpconerr : False positives
+% fnconerr: False Negatives
+
+LLH(st).totconerr.BIC      = sum(double(not((LLH(st).Jcon.BIC      - Adjset{st}) == 0)),'all');
+LLH(st).totconerr.AIC      = sum(double(not((LLH(st).Jcon.AIC      - Adjset{st}) == 0)),'all');
+LLH(st).totconerr.MDLl     = sum(double(not((LLH(st).Jcon.MDLl     - Adjset{st}) == 0)),'all');
+LLH(st).totconerr.MDLu     = sum(double(not((LLH(st).Jcon.MDLu     - Adjset{st}) == 0)),'all');
+LLH(st).totconerr.MDLent   = sum(double(not((LLH(st).Jcon.MDLent   - Adjset{st}) == 0)),'all');
+LLH(st).totconerr.MDLcount = sum(double(not((LLH(st).Jcon.MDLcount - Adjset{st}) == 0)),'all');
+%LLH(st).totconerr = sum(double(not((LLH(st).Jcon - Adjset{st}) == 0)),'all');
+
+LLH(st).perconerr.BIC      = LLH(st).totconerr.BIC      ./ N.^2;
+LLH(st).perconerr.AIC      = LLH(st).totconerr.AIC      ./ N.^2;
+LLH(st).perconerr.MDLl     = LLH(st).totconerr.MDLl     ./ N.^2;
+LLH(st).perconerr.MDLu     = LLH(st).totconerr.MDLu     ./ N.^2;
+LLH(st).perconerr.MDLent   = LLH(st).totconerr.MDLent   ./ N.^2;
+LLH(st).perconerr.MDLcount = LLH(st).totconerr.MDLcount ./ N.^2;
+
+LLH(st).fnconerr.BIC      = sum(double((Adjset{st} - LLH(st).Jcon.BIC       ) == 1),'all');
+LLH(st).fnconerr.AIC      = sum(double((Adjset{st} - LLH(st).Jcon.AIC       ) == 1),'all');
+LLH(st).fnconerr.MDLl     = sum(double((Adjset{st} - LLH(st).Jcon.MDLl      ) == 1),'all');
+LLH(st).fnconerr.MDLu     = sum(double((Adjset{st} - LLH(st).Jcon.MDLu      ) == 1),'all');
+LLH(st).fnconerr.MDLent   = sum(double((Adjset{st} - LLH(st).Jcon.MDLent    ) == 1),'all');
+LLH(st).fnconerr.MDLcount = sum(double((Adjset{st} - LLH(st).Jcon.MDLcount  ) == 1),'all');
 
 
-
+LLH(st).fpconerr.BIC      = sum(double((Adjset{st} - LLH(st).Jcon.BIC       ) == -1),'all');
+LLH(st).fpconerr.AIC      = sum(double((Adjset{st} - LLH(st).Jcon.AIC       ) == -1),'all');
+LLH(st).fpconerr.MDLl     = sum(double((Adjset{st} - LLH(st).Jcon.MDLl      ) == -1),'all');
+LLH(st).fpconerr.MDLu     = sum(double((Adjset{st} - LLH(st).Jcon.MDLu      ) == -1),'all');
+LLH(st).fpconerr.MDLent   = sum(double((Adjset{st} - LLH(st).Jcon.MDLent    ) == -1),'all');
+LLH(st).fpconerr.MDLcount = sum(double((Adjset{st} - LLH(st).Jcon.MDLcount  ) == -1),'all');
+			
 
 end
 
