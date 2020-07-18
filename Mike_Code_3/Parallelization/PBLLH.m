@@ -1,4 +1,5 @@
 %BLLH.m
+% parallelization experiment
 % T: number of observations, length of S
 % N: Number of nodes
 % h_on,used for field variaable to include h value

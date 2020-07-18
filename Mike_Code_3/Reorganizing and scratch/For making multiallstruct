@@ -1,0 +1,54 @@
+MultiAllStruct().Nvec         = []
+MultiAllStruct().Tvec         = []
+MultiAllStruct().betavec      = []
+MultiAllStruct().topologies   = []
+MultiAllStruct().jn           = []
+MultiAllStruct().sparsity     = []
+MultiAllStruct().h_on         = []
+MultiAllStruct().couplings    = []
+MultiAllStruct().c            = []
+MultiAllStruct().time         = []
+MultiAllStruct().AllStruct    = AllStruct
+
+
+n=2;
+
+MultiAllStruct(n).AllStruct    = AllStruct;
+MultiAllStruct(n).time         = ['2257-28Jun20'];
+MultiAllStruct(n).betavec      = [0.4];
+MultiAllStruct(n).sparsity     = [0];
+MultiAllStruct(n).Nvec         = [30,60,120];
+MultiAllStruct(n).Tvec         = [1E3];
+MultiAllStruct(n).topologies   = {'sk',5};
+MultiAllStruct(n).jn           = [1];
+MultiAllStruct(n).h_on         = [1];
+MultiAllStruct(n).couplings    = [2];
+MultiAllStruct(n).c            = [2];
+n = n + 1
+
+
+MultiAllStruct(n).AllStruct    = OverStruct(1).AllStruct 
+MultiAllStruct(n).time         = OverStruct(1).time      
+MultiAllStruct(n).betavec      = OverStruct(1).betavec   
+MultiAllStruct(n).sparsity     = OverStruct(1).sparsity(1)  
+MultiAllStruct(n).Nvec         = OverStruct(1).Nvec      
+MultiAllStruct(n).Tvec         = OverStruct(1).Tvec      
+MultiAllStruct(n).topologies   = OverStruct(1).topologies
+MultiAllStruct(n).jn           = OverStruct(1).jn        
+MultiAllStruct(n).h_on         = OverStruct(1).h_on   
+MultiAllStruct(n).Jstor         = OverStruct(1).Jstor
+
+n = n + 1
+
+
+Trls_1 - Beta[0.2] - Topo[sk,5] - c[2] - N[30] - T[30]
+
+
+
+
+
+
+
+
+
+%MultiAllStruct.topdir       = []

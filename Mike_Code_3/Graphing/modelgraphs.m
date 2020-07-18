@@ -10,7 +10,7 @@ fn = fieldnames(OverStruct);
 for i = 1:length(fn) % for each set of N and T across the same beta
     name = fn{i};
     
-for topo = 1:2%length(topology)
+for topo = 1:length(topology)
 	Jstor(topo).name = name;
     Jstor(topo).topo = topo;
     % Jstor(i).beta 	= AllStruct.(name). not stored

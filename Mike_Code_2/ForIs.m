@@ -47,8 +47,8 @@
 % Possibly add option for distribution chosen
 clear all;
 
-Tval = [1e5];
-Nval = [30];
+Tval = [1e3,1e4];
+Nval = [30,40];
 
 %Tval = [1e3,1e4,1e5]; %| Presetting the T.calculation: 3*M(numel(M))
 %Nval = [50,100,150];
@@ -59,7 +59,7 @@ Nval = [30];
 % Tval = [1e3,1e4,1e5,1e6]; %| Presetting the T.calculation: 3*M(numel(M))
 % Nval = [100,200,300,400,500];
 
-betavec = [0.4]; 
+betavec = [0.1]; 
 %betavec = [0.4,0.9,1.4]; 
 jn = 1; %| Trials
 sparsity = 0;
@@ -193,7 +193,9 @@ AllStruct.(name).S = SstructNorm.S_hat'; % ' %| Adding a fucking ' here so subli
 %% Bulso Likelihood Estimator 
 % create For loop for each observation step against all others
 % no actually put it in it's own conatiner
+tic
 LLH = BLLH(T,N,h_on,AllStruct.(name).S);
+toc
 
 AllStruct.(name).BLLH = LLH;
 

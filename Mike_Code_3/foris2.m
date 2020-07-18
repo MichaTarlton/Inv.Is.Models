@@ -33,33 +33,47 @@ topdir = cd;
 % Parameters
 jn = 1; %| number of Trials
 
-Nvec = [20,30];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
+%test params
+% Nvec = [10];     
+% Tvec = [1e2];   
+% betavec = [0.1];
 
-Tvec = [1e2,1e3];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
+Nvec = [30];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
 
-betavec = [0.2, 0.1]; 			%betavec = [0.4,0.9,1.4];
+Tvec = [1e4];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
 
-sparsity = [0,0.1];						% I need to convert this to a vector as well
+betavec = [0.1]; 			%betavec = [0.4,0.9,1.4];
+
+sprsvec = [0];						% I need to convert this to a vector as well
 
 h_on = 1; 							%% h field genereation
 
-topologies = {'sk',5};		%topologies = {'sk',1,2,3,4,5,6}	%set sk to 0 if you don't want to use it(for now) % make topology the outer looop in the future
+topovec = {5};		%topologies = {'sk',1,2,3,4,5,6}	%set sk to 0 if you don't want to use it(for now) % make topology the outer looop in the future
+                        % if first place is not occupied the ADJSET gets fucked up causing problems further down
+
+
+jta = 1;                % Random name. Our measure of how many trials are run so far
+jtatot = length(sprsvec)*length(betavec)*length(Tvec)*length(Nvec)*length(topovec)*jn
+    
+
+
+
 
 OverStruct = struct;
 
 OverStruct.Nvec 	= Nvec ;
 OverStruct.Tvec 	= Tvec ;
 OverStruct.betavec 	= betavec ;
-OverStruct.topologies = topologies;
+OverStruct.topologies = topovec;
 OverStruct.jn 		= jn 	;
-OverStruct.sparsity = sparsity;
+OverStruct.sprsvec = sprsvec;
 OverStruct.h_on 	= h_on ;
 OverStruct.topdir 	= topdir ;
 OverStruct.time 	= time ;
 
-for  Si = 1:length(sparsity)
+for  Si = 1:length(sprsvec)
  
-    sprs = sparsity(Si);
+    sprs = sprsvec(Si);
 
     AllStruct = struct;
 
@@ -89,8 +103,8 @@ for  Si = 1:length(sparsity)
                 lowdir = [time(1:5),'parameters_',name,'_',time(6:12)];
 
                 mkdir(cd,lowdir);
-                %save([lowdir,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'T','N','beta','topologies','jn','sparsity','h_on','time','name','-v7.3');
-                save([lowdir,'\',time(1:5),'parameters_',name,'_',time(6:12),'.mat'],'T','N','beta','topologies','jn','sparsity','h_on','time','name','-v7.3');
+                %save([lowdir,'\',time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'T','N','beta','topologies','jn','sprsvec','h_on','time','name','-v7.3');
+                save([lowdir,'\',time(1:5),'parameters_',name,'_',time(6:12),'.mat'],'T','N','beta','topovec','jn','sprsvec','h_on','time','name','-v7.3');
                 
                 
                 AllStruct.(name) = {};
@@ -98,8 +112,8 @@ for  Si = 1:length(sparsity)
                 AllStruct.(name).T = T;
                 AllStruct.(name).N = N;
                 AllStruct.(name).beta = beta;
-                AllStruct.(name).sparsity = sparsity;
-                AllStruct.(name).topology = topologies;
+                AllStruct.(name).sprsvec = sprsvec;
+                AllStruct.(name).topology = topovec;
                 
                 
                 
@@ -109,7 +123,7 @@ for  Si = 1:length(sparsity)
                 Adjset = {}; %make sure these aren't duplicated in the topology creator below
                 Jtoposet = {};
                 
-                if topologies{1} == 'sk'
+                if topovec{1} == 'sk'
                     %% Mike's implementation of SK model (I think)
                     JHnorm = JH(N,jn,h_on,sprs,time,T,lowdir,beta); % SK model
                     % AllStruct.(name).Jtru = JHnorm.Jsparse;
@@ -122,8 +136,8 @@ for  Si = 1:length(sparsity)
                 end
                 
                 %% Topologies for sanity check purposes
-                %JHdiscon = JHs(N,jn,h_on,sparsity,time,T,lowdir); %for disconnected J
-                %JHdimer = JD(N,jn,h_on,sparsity,time,T,lowdir); 	%for dimers
+                %JHdiscon = JHs(N,jn,h_on,sprsvec,time,T,lowdir); %for disconnected J
+                %JHdimer = JD(N,jn,h_on,sprsvec,time,T,lowdir); 	%for dimers
                 
                 
                 
@@ -152,8 +166,15 @@ for  Si = 1:length(sparsity)
                 %Adjset = {};
                 %Jtoposet = {};
                 
-                for tp = 2:length(topologies) %topology = 1:6
-                    topo = topologies{tp};
+               if topovec{1} == 'sk'
+                skon = 2;
+                else
+                    skon =1;
+                end
+                    
+
+                for tp = skon:length(topovec) %topology = 1:6 % This doesn't work if you don't have a fist place value of any sort in addition to the
+                    topo = topovec{tp};
                     Adj = set_topology(topo,N,c);
                     Jtopo = set_couplings(couplings,beta,J0,sigJ,Adj);
                     
@@ -166,7 +187,7 @@ for  Si = 1:length(sparsity)
                 JHnorm.Jtopo = Jtoposet; 	% replaces the used J graph if we want to use this topology
                 JHnorm.Htopo = 0 .* ones(1,N);		% Nicola recommends using fixed h for these. iirc setting it too high fucked it up
                 
-                AllStruct.(name).topology = topologies; % starting to duplicate data everywhere
+                AllStruct.(name).topology = topovec; % starting to duplicate data everywhere
                 AllStruct.(name).Jcontru = Adjset;
                 AllStruct.(name).Jtru = Jtoposet;
                 AllStruct.(name).htru = JHnorm.Htopo;
@@ -181,15 +202,15 @@ for  Si = 1:length(sparsity)
                 %% 2.2 Generate S_hat(s_big in bulso) one S vector at a time, for some length based on M
                 
                 
-                %SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sparsity,time,lowdir,beta);
-                SstructNorm = Met_Hast_norm(T,N,size(Jtoposet,2),JHnorm,sparsity,time,lowdir,beta); % Replacing the jn with the number of topologies, so each S is a different topology
+                %SstructNorm = Met_Hast_norm(T,N,jn,JHnorm,sprsvec,time,lowdir,beta);
+                SstructNorm = Met_Hast_norm(T,N,size(Jtoposet,2),JHnorm,sprs,time,lowdir,beta); % Replacing the jn with the number of topologies, so each S is a different topology
                 
                 % AllStruct.(name).S = SstructNorm.S_hat; %  %| Adding a fucking ' here so sublime doesn'tlose it's shit %Removed the transpose so it might not work with regular sanity checks, fix that down the line
                 AllStruct.(name).S = SstructNorm; % for working over multiple topologies and multiple output S
                 
                 %% Sanity check spike trains
-                %SstructDisc =  Met_Hast_Disc(T,N,jn,JHdiscon,sparsity,time,lowdir,beta);
-                %SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sparsity,time,lowdir,beta);
+                %SstructDisc =  Met_Hast_Disc(T,N,jn,JHdiscon,sprs,time,lowdir,beta);
+                %SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sprs,time,lowdir,beta);
                
                 
                 
@@ -197,7 +218,7 @@ for  Si = 1:length(sparsity)
                 %%% Part 3 SANITY CHECK graphs and inference methods
                 % Variational inerence methods are built in here
                 
-                %sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sparsity,time,T,N,lowdir,beta);
+                %sanitynorm = sanitychknorm(jn,SstructNorm,JHnorm,sprs,time,T,N,lowdir,beta);
                 %AllStruct.(name).Jmf = sanitynorm.mfJ;
                 %AllStruct.(name).hmf = sanitynorm.mfh;
                 %AllStruct.(name).Jtap	=	sanitynorm.tapJ;
@@ -205,8 +226,8 @@ for  Si = 1:length(sparsity)
                 %AllStruct.(name).Jplmf	=	sanitynorm.plJmf;
                 %AllStruct.(name).hplmf	=	sanitynorm.plhmf;
                 
-                %sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sparsity,time,T,lowdir);
-                %sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sparsity,time,T,lowdir);
+                %sanitydisc = sanitychkdiscon(jn,SstructDisc,JHdiscon,sprs,time,T,lowdir);
+                %sanitydimer = sanitychkdimer(jn,SstructDimer,JHdimer,sprs,time,T,lowdir);
                
                 
                 
@@ -223,8 +244,13 @@ for  Si = 1:length(sparsity)
                 % create For loop for each observation step against all others
                 % no actually put it in it's own conatiner
                 
-                LLH = BLLH(T,N,h_on,AllStruct.(name).S,Adjset);
+                %LLH = BLLH(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,jta,jtatot);
                 
+                %Testing Ncolas original code to see if I somehow fucked
+                %something up
+                tic 
+                LLH = decimation_MS_log_reg_LocIsing(N,h_on,T,AllStruct.(name).S);
+                toc
                 AllStruct.(name).BLLH = LLH;
                 %AllStruct.(name).avgconerr = mean([LLH.totconerr]); %vestigial since made individual errors for each penalty method
                 
@@ -264,8 +290,14 @@ for  Si = 1:length(sparsity)
 end    
 
 
-    Jstor = modelgraphs2(OverStruct,sparsity,betavec,Nvec,Tvec,topologies);
+    Jstor = modelgraphs2(OverStruct,sprsvec,betavec,Nvec,Tvec,topovec);
     OverStruct(1).Jstor = Jstor;
+    %modelgraphs3(Jstor,sprsvec,betavec,Nvec,Tvec,topologies);
+    %Jstor2 = modelgraphs4(Jstor,sprsvec,betavec,Nvec,Tvec,topologies);
+    figstor = modelgraphs6(OverStruct);
+    figstorAUROC = modelgraphs7(OverStruct);
+    figstorTFRatio = modelgraphs8(OverStruct);
+    save([cd,'\',time(1:5),'OverStruct_',time(6:12),'.mat'],'OverStruct','-v7.3');
 
 
 

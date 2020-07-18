@@ -43,7 +43,7 @@ function JHnorm = JH(N,jn,h_on,sparsity,time,T,lowdir,beta)
 	JHnorm(i).Jgaus = R3;
 	JHnorm(i).Jsparse =  R3s;
 	%JHnorm(i).Jcon =  double(R3s ~= 0)); % adding for topology reconstruction
-	JHnorm(i).Jcon =  Rcon  % for only connections greater than particular std deviation given
+	JHnorm(i).Jcon =  Rcon;  % for only connections greater than particular std deviation given
 	JHnorm(i).Jsparse2 =  R3s.*Rcon;
 
 

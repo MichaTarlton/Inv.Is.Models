@@ -150,7 +150,7 @@ for i_model = 1:Np
     model(i_model+1,:) = model(i_model,:);
     model(i_model+1,i_rm) = 0;
     
-    disp(['Model ', num2str(i_model)])
+    %disp(['Model ', num2str(i_model)])
 end
 
 % zero parameters model
