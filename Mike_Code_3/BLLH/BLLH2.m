@@ -5,7 +5,7 @@
 % h_on,used for field variaable to include h value
 
 
-function [LLH, jta] = PBLLH(T,N,beta,sprs,h_on,SStruct,Adjset,Jtoposet,jta,jtatot)
+function [LLH, jta] = BLLH2(T,N,beta,sprs,h_on,SStruct,Adjset,jta,jtatot)
 
 LLH = struct('NodeModel',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym',{},'symrate',{},'asymrate',{});
 
@@ -16,7 +16,6 @@ lm = length(modelvec);
 
 for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 
-	Jtru = Jtoposet{st};
 	S = SStruct(st).S_hat;
 	%S = S'; %Removed the top level transpose for now
 	
@@ -49,7 +48,7 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 	 thetaMDLcount = [];
 	
 	
-		parfor t = 1:N
+		for t = 1:N
 			
 			disp(['Sprs ', num2str(sprs),' Topo ', num2str(st),' N ', num2str(N),' T ', num2str(T), ' Node ', num2str(t)])
 			
@@ -296,12 +295,6 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 			%LLH(st).precision.MDLent  	=	LLH(st).tpconerr.MDLent   ./ (LLH(st).fpconerr.MDLent   + LLH(st).tpconerr.MDLent  );
 			%LLH(st).precision.MDLcount	=	LLH(st).tpconerr.MDLcount ./ (LLH(st).fpconerr.MDLcount + LLH(st).tpconerr.MDLcount);
 
-		%% True False Sum			
-		LLH(st).TFS.(model)     	=	LLH(st).tpconerr.(model) + LLH(st).fpconerr.(model);
-
-		%%True False Ratio
-		LLH(st).TFR.(model)     	=	(LLH(st).tpconerr.(model) - LLH(st).fpconerr.(model)) ./ (LLH(st).TFS.(model) + LLH(st).tnconerr.(model));	
-
 
 		%smmetry optimization
 		Jcon = LLH(st).Jcon.(model);
@@ -335,21 +328,6 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 
 		LLH(st).Jsymrecon.(model) = Jsymrecon + Jrecon;
 		LLH(st).Jsymcon.(model) = (Jsymrecon + Jrecon) ~= 0 ;
-
-		avgcon = (triu(Jsymrecon) + tril(Jsymrecon)')/2;
-		Javgsymrecon = avgcon + avgcon';
-
-		symtotconerr = sum(double(not((Javgsymrecon - Jtru) == 0)),'all');
-		symperconerr = symtotconerr ./ N.^2;
-		
-		LLH(st).Javgsymrecon.(model) = Javgsymrecon;
-		LLH(st).symtotconerr.(model)      = symtotconerr;
-		LLH(st).symperconerr.(model)      = symperconerr;
-
-
-		LLH(st).Jrrerr.(model) 		=sqrt(sum((Jrecon 		- Jtru).^2 / sum(Jtru.^2)));
-		LLH(st).Jsymrrerr.(model) 	=sqrt(sum((Jsymrecon 		- Jtru).^2 / sum(Jtru.^2)));
-		LLH(st).Javgsymrrerr.(model) =sqrt(sum((Javgsymrecon 	- Jtru).^2 / sum(Jtru.^2)));
 
 
 	end

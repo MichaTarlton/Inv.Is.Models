@@ -33,8 +33,8 @@ Navg = T*Int;			%| end state number of iterations post equilibrium reached
 
 SstructNorm = struct('S_hat',{},'mi',{},'mimj',{},'chi',{},'Cij',{},'mCij',{},'mequil',{},'Cequil',{});
 
-%parfor i = 1:jn
-for i = 1:jn
+%for i = 1:jn
+parfor i = 1:jn
 	Energy = zeros(1,Nequil+Navg);
 
 	% Set J and H from JHstruct
@@ -42,10 +42,13 @@ for i = 1:jn
 	% h = JHstruct(i).Hsparse;
 
 	% for bulso topologies
-	J = JHstruct.Jtopo{1, i};
-	h = JHstruct.Htopo;
+	%J = JHstruct.Jtopo{1, i};
+	%h = JHstruct.Htopo{1, i};
+	J = JHstruct(i).Jtopo;
+	h = JHstruct(i).Htopo;
+
 	
-		
+
 	% initial configuration & representation 
 	S = double(rand(1,N) > 0.5);
 	S = 2*S-1;
@@ -173,7 +176,7 @@ for i = 1:jn
 	SstructNorm(i).mequil   = mean(S_eq);
 	SstructNorm(i).Chiequil = S_eq'*S_eq/T;
     
-    disp(['Saving ',num2str(i)])
+    %isp(['Saving ',num2str(i)])
 	%save([lowdir,'\',time(1:5),'SstructNorm_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12),'.mat'],'SstructNorm','-v7.3');
 	disp(['End Normal S run ',num2str(i)])
 end

@@ -12,7 +12,13 @@ Jstor = struct;
 models = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}];
 %topologies = {'sk',1,2,3,4,5,6}
 
+Overstruct
+
+
+
 for ali = 1: length(OverStruct)
+
+
 
 	% Topology
 	

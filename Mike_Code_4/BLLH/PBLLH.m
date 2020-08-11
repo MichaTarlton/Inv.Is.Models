@@ -11,8 +11,10 @@ LLH = struct('NodeModel',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym'
 
 
 modelvec = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}];
+statfieldnames  = [{'symrate'},{'asymrate'},{'totconerr'},{'perconerr'},{'tnconerr'},{'tpconerr'},{'fnconerr'},{'fpconerr'},{'fallout'},{'recall'},{'precision'},{'TFS'},{'TFR'},{'symtotconerr'},{'symperconerr'},{'Jrrerr'},{'Jsymrrerr'},{'Javgsymrrerr'}];
 lm = length(modelvec);
 
+statvecs = struct;
 
 for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 
@@ -25,7 +27,7 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 	%disp(['Topology ', num2str(st)])
 	disp(['Sprs ', num2str(sprs),' Topo ', num2str(st),' bt ', num2str(beta),' N ', num2str(N),' T ', num2str(T)])
 	tic
-	NodeModel = struct('w_ML',{},'l_ML',{},'posterior',{},'cost',{},'BestModel',{},'IMAX',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym',{},'symrate',{},'asymrate',{});	
+	NodeModel = struct('w_ML',{},'l_ML',{},'posterior',{},'cost',{},'BestModel',{},'IMAX',{});	
 	
 	 JconBIC   	  = [];
 	 JconAIC   	  = [];
@@ -99,6 +101,7 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 	
 	% Kinda forgot what this is, check the paper and above
 	% oh is this the pre seperation of j and h
+	% all of this could be put in the below at some more optimized time
 
 	%LLH(st).theta 	 =  theta;
 	LLH(st).theta.BIC      = thetaBIC;
@@ -352,12 +355,34 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 		LLH(st).Javgsymrrerr.(model) =sqrt(sum((Javgsymrecon 	- Jtru).^2 / sum(Jtru.^2)));
 
 
-	end
+		%% putting inside st for each llh struct loop
+		
+		for ft = 1:length(statfieldnames)
 
+			statvecs.(model).(statfieldnames{ft}) = [statvecs.(model).(statfieldnames{ft}), LLH(st).(statfieldnames{ft}).(model)];
+		end
+	end
 end
 
 
 
+%% Making the stats for the LLH over trials
+	%{'NodeModel'   }
+    %,{'theta'       }
+    %,{'hrecon'      }
+    %,{'Jrecon'      }
+    %,{'Jcon'        }
+    %,{'Jasym'       }
+    %,{'asymrow'     }
+    %,{'asymcol'     }
+    %,{'Jsymrecon'   }
+    %,{'Jsymcon'     }
+    %,{'Javgsymrecon'}
+
+
+    %% inside the 
+    % modelvec = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}]
+    % This is above already
 
 
 %ok luckily though at a glance the values seem similar,so I may be able to just avg them out

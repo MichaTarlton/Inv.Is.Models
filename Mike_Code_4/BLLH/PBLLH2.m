@@ -5,18 +5,30 @@
 % h_on,used for field variaable to include h value
 
 
-function [LLH, jta] = PBLLH(T,N,beta,sprs,h_on,SStruct,Adjset,Jtoposet,jta,jtatot)
+function [LLH,statvecs,stats,jta] = PBLLH2(T,N,beta,sprs,h_on,SStruct,JHnorm,jta,jtatot)
 
 LLH = struct('NodeModel',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym',{},'symrate',{},'asymrate',{});
 
 
-modelvec = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}];
+modelvec = [{'BIC'},{'AIC'},{'MDLl'},{'MDLu'},{'MDLent'},{'MDLcount'}];
 lm = length(modelvec);
+statfieldnames  = [{'symrate'},{'asymrate'},{'totconerr'},{'perconerr'},{'tnconerr'},{'tpconerr'},{'fnconerr'},{'fpconerr'},{'fallout'},{'recall'},{'precision'},{'TFS'},{'TFR'},{'symtotconerr'},{'symperconerr'},{'Jrrerr'},{'Jsymrrerr'},{'Javgsymrrerr'}];
+fm = length(statfieldnames);
+
+
+%% creating storage struct cause it gets fucky laters
+statvecs = struct;
+stats = struct; 	%('mean',{},'stddev',{},'stderr',{},'variance',{},'range',{});
+for ft1 = 1:length(statfieldnames)
+	for mt1 = 1:lm
+		statvecs.(modelvec{mt1}).(statfieldnames{ft1}) = [];
+	end
+end
 
 
 for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
-
-	Jtru = Jtoposet{st};
+	Adjset = JHnorm(st).Adjset;
+	Jtru = JHnorm(st).Jtopo;
 	S = SStruct(st).S_hat;
 	%S = S'; %Removed the top level transpose for now
 	
@@ -25,7 +37,7 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 	%disp(['Topology ', num2str(st)])
 	disp(['Sprs ', num2str(sprs),' Topo ', num2str(st),' bt ', num2str(beta),' N ', num2str(N),' T ', num2str(T)])
 	tic
-	NodeModel = struct('w_ML',{},'l_ML',{},'posterior',{},'cost',{},'BestModel',{},'IMAX',{},'theta',{},'hrecon',{},'Jrecon',{},'Jcon',{},'Jasym',{},'symrate',{},'asymrate',{});	
+	NodeModel = struct('w_ML',{},'l_ML',{},'posterior',{},'cost',{},'BestModel',{},'IMAX',{});	
 	
 	 JconBIC   	  = [];
 	 JconAIC   	  = [];
@@ -56,7 +68,8 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 			X = S(:,setdiff(1:N,t));
 			Y = S(:,t);
 			
-			[w_ML,l_ML,posterior,cost,BestModel,IMAX] = decimation_logistic_Model_Selection(X,Y,h_on);
+			[w_ML,l_ML,posterior,cost,BestModel,IMAX] = decimation_logistic_Model_Selection(X,Y,1); % for my purposes h_on is always set to on here in order for the math to function correctly
+			%[w_ML,l_ML,posterior,cost,BestModel,IMAX] = decimation_logistic_Model_Selection(X,Y,h_on);
 			
 			%LLH(st).NodeModel(t).w_ML 	 = w_ML;
 			%LLH(st).NodeModel(t).l_ML		 = l_ML;
@@ -99,6 +112,7 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 	
 	% Kinda forgot what this is, check the paper and above
 	% oh is this the pre seperation of j and h
+	% all of this could be put in the below at some more optimized time
 
 	%LLH(st).theta 	 =  theta;
 	LLH(st).theta.BIC      = thetaBIC;
@@ -166,38 +180,13 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 		LLH(st).Jasym.(model)      = tril(LLH(st).Jcon.(model))' + triu(LLH(st).Jcon.(model));
 		Jasym = LLH(st).Jasym.(model);
 		Jrecon = LLH(st).Jrecon.(model);
-
-
-			%LLH(st).Jasym.BIC      = tril(LLH(st).Jcon.BIC     )' + triu(LLH(st).Jcon.BIC     );
-			%LLH(st).Jasym.AIC      = tril(LLH(st).Jcon.AIC     )' + triu(LLH(st).Jcon.AIC     );
-			%LLH(st).Jasym.MDLl     = tril(LLH(st).Jcon.MDLl    )' + triu(LLH(st).Jcon.MDLl    );
-			%LLH(st).Jasym.MDLu     = tril(LLH(st).Jcon.MDLu    )' + triu(LLH(st).Jcon.MDLu    );
-			%LLH(st).Jasym.MDLent   = tril(LLH(st).Jcon.MDLent  )' + triu(LLH(st).Jcon.MDLent  );
-			%LLH(st).Jasym.MDLcount = tril(LLH(st).Jcon.MDLcount)' + triu(LLH(st).Jcon.MDLcount);					
-			%LLH(st).Jasym = tril(Jcon)' + triu(Jcon);		% Checking to see if duplicate values exist (first try says yes)
 		
-		% symmetry
+		% symmetry rate
 		LLH(st).symrate.(model)	= sum(double(LLH(st).Jasym.(model) == 2),'all');
 
-			%LLH(st).symrate.BIC      = sum(double(LLH(st).Jasym.BIC      == 2),'all');
-			%LLH(st).symrate.AIC      = sum(double(LLH(st).Jasym.AIC      == 2),'all');
-			%LLH(st).symrate.MDLl     = sum(double(LLH(st).Jasym.MDLl     == 2),'all');
-			%LLH(st).symrate.MDLu     = sum(double(LLH(st).Jasym.MDLu     == 2),'all');
-			%LLH(st).symrate.MDLent   = sum(double(LLH(st).Jasym.MDLent   == 2),'all');
-			%LLH(st).symrate.MDLcount = sum(double(LLH(st).Jasym.MDLcount == 2),'all');
-			%LLH(st).symrate = sum(double(LLH(1).Jasym == 2),'all');
-		
-		% asymmetry
+		% asymmetry rate
 		LLH(st).asymrate.(model)      = sum(double(LLH(st).Jasym.(model)      == 1),'all');
 
-			%LLH(st).asymrate.BIC      = sum(double(LLH(st).Jasym.BIC      == 1),'all');
-			%LLH(st).asymrate.AIC      = sum(double(LLH(st).Jasym.AIC      == 1),'all');
-			%LLH(st).asymrate.MDLl     = sum(double(LLH(st).Jasym.MDLl     == 1),'all');
-			%LLH(st).asymrate.MDLu     = sum(double(LLH(st).Jasym.MDLu     == 1),'all');
-			%LLH(st).asymrate.MDLent   = sum(double(LLH(st).Jasym.MDLent   == 1),'all');
-			%LLH(st).asymrate.MDLcount = sum(double(LLH(st).Jasym.MDLcount == 1),'all');
-			%LLH(st).asymrate = sum(double(LLH(1).Jasym == 1),'all');
-		
 		% For finding connection error rates 
 		% Perhaps should incorporate back into BLLH
 		% totconerr: total error in infer connections
@@ -205,96 +194,30 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 		% fnconerr: False Negatives
 		
 		% Total amount of error
-		LLH(st).totconerr.(model)      = sum(double(not((LLH(st).Jcon.(model)      - Adjset{st}) == 0)),'all');
-
-			%LLH(st).totconerr.BIC      = sum(double(not((LLH(st).Jcon.BIC      - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr.AIC      = sum(double(not((LLH(st).Jcon.AIC      - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr.MDLl     = sum(double(not((LLH(st).Jcon.MDLl     - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr.MDLu     = sum(double(not((LLH(st).Jcon.MDLu     - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr.MDLent   = sum(double(not((LLH(st).Jcon.MDLent   - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr.MDLcount = sum(double(not((LLH(st).Jcon.MDLcount - Adjset{st}) == 0)),'all');
-			%LLH(st).totconerr = sum(double(not((LLH(st).Jcon - Adjset{st}) == 0)),'all');
+		LLH(st).totconerr.(model)      = sum(double(not((LLH(st).Jcon.(model)      - Adjset) == 0)),'all');
 		
 		%Total percent connection error%
 		LLH(st).perconerr.(model)      = LLH(st).totconerr.(model)      ./ N.^2;
-
-			%LLH(st).perconerr.BIC      = LLH(st).totconerr.BIC      ./ N.^2;
-			%LLH(st).perconerr.AIC      = LLH(st).totconerr.AIC      ./ N.^2;
-			%LLH(st).perconerr.MDLl     = LLH(st).totconerr.MDLl     ./ N.^2;
-			%LLH(st).perconerr.MDLu     = LLH(st).totconerr.MDLu     ./ N.^2;
-			%LLH(st).perconerr.MDLent   = LLH(st).totconerr.MDLent   ./ N.^2;
-			%LLH(st).perconerr.MDLcount = LLH(st).totconerr.MDLcount ./ N.^2;
-		
 		
 		% True Negatives amount
-		LLH(st).tnconerr.(model)      = sum(double((Adjset{st} + LLH(st).Jcon.(model)       ) == 0),'all');
-
-			%LLH(st).tnconerr.BIC      = sum(double((Adjset{st} + LLH(st).Jcon.BIC       ) == 0),'all');
-			%LLH(st).tnconerr.AIC      = sum(double((Adjset{st} + LLH(st).Jcon.AIC       ) == 0),'all');
-			%LLH(st).tnconerr.MDLl     = sum(double((Adjset{st} + LLH(st).Jcon.MDLl      ) == 0),'all');
-			%LLH(st).tnconerr.MDLu     = sum(double((Adjset{st} + LLH(st).Jcon.MDLu      ) == 0),'all');
-			%LLH(st).tnconerr.MDLent   = sum(double((Adjset{st} + LLH(st).Jcon.MDLent    ) == 0),'all');
-			%LLH(st).tnconerr.MDLcount = sum(double((Adjset{st} + LLH(st).Jcon.MDLcount  ) == 0),'all');
+		LLH(st).tnconerr.(model)      = sum(double((Adjset + LLH(st).Jcon.(model)       ) == 0),'all');
 		
 		% True positives amount
-		LLH(st).tpconerr.(model)      = sum(double((Adjset{st} + LLH(st).Jcon.(model)       ) == 2),'all');
-			
-			%LLH(st).tpconerr.BIC      = sum(double((Adjset{st} + LLH(st).Jcon.BIC       ) == 2),'all');
-			%LLH(st).tpconerr.AIC      = sum(double((Adjset{st} + LLH(st).Jcon.AIC       ) == 2),'all');
-			%LLH(st).tpconerr.MDLl     = sum(double((Adjset{st} + LLH(st).Jcon.MDLl      ) == 2),'all');
-			%LLH(st).tpconerr.MDLu     = sum(double((Adjset{st} + LLH(st).Jcon.MDLu      ) == 2),'all');
-			%LLH(st).tpconerr.MDLent   = sum(double((Adjset{st} + LLH(st).Jcon.MDLent    ) == 2),'all');
-			%LLH(st).tpconerr.MDLcount = sum(double((Adjset{st} + LLH(st).Jcon.MDLcount  ) == 2),'all');
-					
-		
+		LLH(st).tpconerr.(model)      = sum(double((Adjset + LLH(st).Jcon.(model)       ) == 2),'all');
 		
 		% False Negatives amount
-		LLH(st).fnconerr.(model)      = sum(double((Adjset{st} - LLH(st).Jcon.(model)       ) == 1),'all');
-
-		%LLH(st).fnconerr.BIC      = sum(double((Adjset{st} - LLH(st).Jcon.BIC       ) == 1),'all');
-		%LLH(st).fnconerr.AIC      = sum(double((Adjset{st} - LLH(st).Jcon.AIC       ) == 1),'all');
-		%LLH(st).fnconerr.MDLl     = sum(double((Adjset{st} - LLH(st).Jcon.MDLl      ) == 1),'all');
-		%LLH(st).fnconerr.MDLu     = sum(double((Adjset{st} - LLH(st).Jcon.MDLu      ) == 1),'all');
-		%LLH(st).fnconerr.MDLent   = sum(double((Adjset{st} - LLH(st).Jcon.MDLent    ) == 1),'all');
-		%LLH(st).fnconerr.MDLcount = sum(double((Adjset{st} - LLH(st).Jcon.MDLcount  ) == 1),'all');
+		LLH(st).fnconerr.(model)      = sum(double((Adjset - LLH(st).Jcon.(model)       ) == 1),'all');
 		
 		% False positives amount
-		LLH(st).fpconerr.(model)      = sum(double((Adjset{st} - LLH(st).Jcon.(model)       ) == -1),'all');
+		LLH(st).fpconerr.(model)      = sum(double((Adjset - LLH(st).Jcon.(model)       ) == -1),'all');
 
-			%LLH(st).fpconerr.BIC      = sum(double((Adjset{st} - LLH(st).Jcon.BIC       ) == -1),'all');
-			%LLH(st).fpconerr.AIC      = sum(double((Adjset{st} - LLH(st).Jcon.AIC       ) == -1),'all');
-			%LLH(st).fpconerr.MDLl     = sum(double((Adjset{st} - LLH(st).Jcon.MDLl      ) == -1),'all');
-			%LLH(st).fpconerr.MDLu     = sum(double((Adjset{st} - LLH(st).Jcon.MDLu      ) == -1),'all');
-			%LLH(st).fpconerr.MDLent   = sum(double((Adjset{st} - LLH(st).Jcon.MDLent    ) == -1),'all');
-			%LLH(st).fpconerr.MDLcount = sum(double((Adjset{st} - LLH(st).Jcon.MDLcount  ) == -1),'all');
-			
 		LLH(st).fallout.(model)     	=	LLH(st).fpconerr.(model)      ./ (LLH(st).fpconerr.(model)      + LLH(st).tnconerr.(model)     );			
-			%LLH(st).fallout.BIC     	=	LLH(st).fpconerr.BIC      ./ (LLH(st).fpconerr.BIC      + LLH(st).tnconerr.BIC     );
-			%LLH(st).fallout.AIC     	=	LLH(st).fpconerr.AIC      ./ (LLH(st).fpconerr.AIC      + LLH(st).tnconerr.AIC     );
-			%LLH(st).fallout.MDLl    	=	LLH(st).fpconerr.MDLl     ./ (LLH(st).fpconerr.MDLl     + LLH(st).tnconerr.MDLl    );
-			%LLH(st).fallout.MDLu    	=	LLH(st).fpconerr.MDLu     ./ (LLH(st).fpconerr.MDLu     + LLH(st).tnconerr.MDLu    );
-			%LLH(st).fallout.MDLent  	=	LLH(st).fpconerr.MDLent   ./ (LLH(st).fpconerr.MDLent   + LLH(st).tnconerr.MDLent  );
-			%LLH(st).fallout.MDLcount	=	LLH(st).fpconerr.MDLcount ./ (LLH(st).fpconerr.MDLcount + LLH(st).tnconerr.MDLcount);
 		
 		%LLH(st).recall.		=	tpconerr ./ (fnconerr + tpconerr);
 		LLH(st).recall.(model)     	=	LLH(st).tpconerr.(model) ./ (LLH(st).fnconerr.(model) + LLH(st).tpconerr.(model));		
-
-			%LLH(st).recall.BIC     	=	LLH(st).tpconerr.BIC ./ (LLH(st).fnconerr.BIC + LLH(st).tpconerr.BIC);
-			%LLH(st).recall.AIC     	=	LLH(st).tpconerr.AIC ./ (LLH(st).fnconerr.AIC + LLH(st).tpconerr.AIC);
-			%LLH(st).recall.MDLl    	=	LLH(st).tpconerr.MDLl ./ (LLH(st).fnconerr.MDLl + LLH(st).tpconerr.MDLl);
-			%LLH(st).recall.MDLu    	=	LLH(st).tpconerr.MDLu ./ (LLH(st).fnconerr.MDLu + LLH(st).tpconerr.MDLu);
-			%LLH(st).recall.MDLent  	=	LLH(st).tpconerr.MDLent ./ (LLH(st).fnconerr.MDLent + LLH(st).tpconerr.MDLent);
-			%LLH(st).recall.MDLcount	=	LLH(st).tpconerr.MDLcount ./ (LLH(st).fnconerr.MDLcount + LLH(st).tpconerr.MDLcount);
 	
 		%LLH(st).precision. 	=	tpconerr ./ (tpconerr + fpconerr);
 		LLH(st).precision.(model)     	=	LLH(st).tpconerr.(model)      ./ (LLH(st).fpconerr.(model)      + LLH(st).tpconerr.(model)     );
-
-			%LLH(st).precision.BIC     	=	LLH(st).tpconerr.BIC      ./ (LLH(st).fpconerr.BIC      + LLH(st).tpconerr.BIC     );
-			%LLH(st).precision.AIC     	=	LLH(st).tpconerr.AIC      ./ (LLH(st).fpconerr.AIC      + LLH(st).tpconerr.AIC     );
-			%LLH(st).precision.MDLl    	=	LLH(st).tpconerr.MDLl     ./ (LLH(st).fpconerr.MDLl     + LLH(st).tpconerr.MDLl    );
-			%LLH(st).precision.MDLu    	=	LLH(st).tpconerr.MDLu     ./ (LLH(st).fpconerr.MDLu     + LLH(st).tpconerr.MDLu    );
-			%LLH(st).precision.MDLent  	=	LLH(st).tpconerr.MDLent   ./ (LLH(st).fpconerr.MDLent   + LLH(st).tpconerr.MDLent  );
-			%LLH(st).precision.MDLcount	=	LLH(st).tpconerr.MDLcount ./ (LLH(st).fpconerr.MDLcount + LLH(st).tpconerr.MDLcount);
 
 		%% True False Sum			
 		LLH(st).TFS.(model)     	=	LLH(st).tpconerr.(model) + LLH(st).fpconerr.(model);
@@ -352,12 +275,43 @@ for st = 1:size(SStruct,2) % Structs make sizing weird, this is correct though
 		LLH(st).Javgsymrrerr.(model) =sqrt(sum((Javgsymrecon 	- Jtru).^2 / sum(Jtru.^2)));
 
 
+		%% putting inside st for each llh struct loop
+		
+		for ft = 1:length(statfieldnames)
+			statvecs.(model).(statfieldnames{ft}) = [statvecs.(model).(statfieldnames{ft}), LLH(st).(statfieldnames{ft}).(model)];
+		end
 	end
-
 end
 
 
+for mt2 = 1:lm 
+	model = modelvec{mt2};
+	for ft2 = 1:fm
+		stats.mean.(model).(statfieldnames{ft2}) =		[mean(statvecs.(model).(statfieldnames{ft2}))];
+		stats.stddev.(model).(statfieldnames{ft2}) =	[std(statvecs.(model).(statfieldnames{ft2}))];
+		stats.stderr.(model).(statfieldnames{ft2}) =	[std(statvecs.(model).(statfieldnames{ft2}))/sqrt(size(SStruct,2))]; % std(x)/sqrt(length(x));
+		stats.variance.(model).(statfieldnames{ft2}) =	[var(statvecs.(model).(statfieldnames{ft2}))];
+		stats.range.(model).(statfieldnames{ft2}) =		[range(statvecs.(model).(statfieldnames{ft2}),'all')];
+	end
+end		
 
+%% Making the stats for the LLH over trials
+	%{'NodeModel'   }
+    %,{'theta'       }
+    %,{'hrecon'      }
+    %,{'Jrecon'      }
+    %,{'Jcon'        }
+    %,{'Jasym'       }
+    %,{'asymrow'     }
+    %,{'asymcol'     }
+    %,{'Jsymrecon'   }
+    %,{'Jsymcon'     }
+    %,{'Javgsymrecon'}
+
+
+    %% inside the 
+    % modelvec = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}]
+    % This is above already
 
 
 %ok luckily though at a glance the values seem similar,so I may be able to just avg them out

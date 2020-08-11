@@ -32,7 +32,7 @@ ltopo = length(topovec);
 
 % Sparsity
 %sprsvec = sprsvec;
-sprsvec = OverStruct.sparsity;
+sprsvec = OverStruct.sprsvec;
 lsprs = length(sprsvec);
 
 
@@ -53,7 +53,7 @@ lN = length(Nvec);
 colorvec = {'b-o','r-o','m-o','g-o','y-o','k-o'};
 %colorvec = {'b','r','m','g','y','k'};
 modelvec = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}];
-modelvec = modelvec; 
+%modelvec = modelvec; 
 lm = length(modelvec);
 
 % scores (tend to be the y subplot axis)
@@ -165,28 +165,39 @@ for topology = 1:length(topovec) % for each complete figure
 					hold on
 				end
 				
-				j = j +1;
+				j = j +1
 
 			end
 		end
-
+j = j-1
  			axh = findobj(h,'Type','Axes');
             axh2 = axh;
-            axh2(4).YAxisLocation = 'right';
-            axh2(1).YAxisLocation = 'right';
+            %axh2(4).YAxisLocation = 'right'; %not sure why these aren't working suddenly
+            %axh2(1).YAxisLocation = 'right';
 
 %  			ax2 = axes('XAxisLocation','top',...
 %          'YAxisLocation','right',...
 %          'Color','none',...
 %          'XColor','k','YColor','k');
+			
+			for labels = 1:figwidth
+				jj = 0
+				title(axh(j - jj), ['\beta = ',num2str(betavec(1))],'FontSize',20,'FontWeight','bold')
+				
+				ylabel(axh2(figwidth),['T=1E',num2str(log10(Tvec(1)))],'FontSize',20,'FontWeight','bold') % not finished here
+				jj= jj+1;
+			end
 
-         	title(axh(6), ['\beta = ',num2str(betavec(1))],'FontSize',20,'FontWeight','bold')
-         	title(axh(5), ['\beta = ',num2str(betavec(2))],'FontSize',20,'FontWeight','bold')
-         	title(axh(4), ['\beta = ',num2str(betavec(3))],'FontSize',20,'FontWeight','bold')
-         	%ylabel(axh(3),['T=1E',num2str(log10(Tvec(2)))],'FontWeight','bold')
-         	ylabel(axh2(1),['T=1E',num2str(log10(Tvec(2)))],'FontSize',20,'FontWeight','bold')
-         	%ylabel(axh(6),['T=1E',num2str(log10(Tvec(1)))],'FontWeight','bold')
-         	ylabel(axh2(4),['T=1E',num2str(log10(Tvec(1)))],'FontSize',20,'FontWeight','bold')
+
+
+
+         	%title(axh(6), ['\beta = ',num2str(betavec(1))],'FontSize',20,'FontWeight','bold')
+         	%title(axh(5), ['\beta = ',num2str(betavec(2))],'FontSize',20,'FontWeight','bold')
+         	%title(axh(4), ['\beta = ',num2str(betavec(3))],'FontSize',20,'FontWeight','bold')
+         	%%ylabel(axh(3),['T=1E',num2str(log10(Tvec(2)))],'FontWeight','bold')
+         	%ylabel(axh2(1),['T=1E',num2str(log10(Tvec(2)))],'FontSize',20,'FontWeight','bold')
+         	%%ylabel(axh(6),['T=1E',num2str(log10(Tvec(1)))],'FontWeight','bold')
+         	%ylabel(axh2(4),['T=1E',num2str(log10(Tvec(1)))],'FontSize',20,'FontWeight','bold')
 
          	%[ax1,h1]=suplabel(['AUPRC in order of values of N : ', num2str(Nvec)]);
     	    %[ax2,h2]=suplabel('Precision: $\frac{TP}{TP + FP}$','y'); figure out the latex here in a sec

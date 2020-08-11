@@ -1,0 +1,37 @@
+scratch pad fixing sym opt
+
+zeron = zeros(size(wml,1),1)
+
+idx0 = 1:1:length(wml);
+
+setdiff(A,C)
+
+
+
+A = setdiff(idx0,i:N)
+B = setdiff(idx0,1:i-1)
+
+
+
+
+
+idx0 = 1:1:size(wml,2);
+zeron = zeros(size(wml,1),1);
+A = setdiff(idx0,i:N)
+B = setdiff(idx0,1:i-1)
+
+wml2 = [wml(:,A),zeron,wml(:,B)]
+
+%% ok but for us we want to put a zero column where we have our "row"
+% so... i = row(coordno)
+
+i = row(coordno);
+idx0 = 1:1:size(wml,2);
+zeron = zeros(size(wml,1),1);
+A = setdiff(idx0,i:N);
+B = setdiff(idx0,1:i-1);
+wml2 = [wml(:,A),zeron,wml(:,B)];
+
+
+
+ok making script

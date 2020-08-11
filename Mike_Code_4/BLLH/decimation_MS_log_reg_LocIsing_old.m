@@ -118,8 +118,7 @@ for iNp_inactive = 1:numel(vNp_inactive)
         % generate more data to avoid many Monte Carlo
         rep = true;
         XX = Metropolis_Hasting(3*M(numel(M)),Nx,beta*W,beta*H,rep);
-        X = ones(M(numel(M)),Nx); 
-        Y = ones(M(numel(M)),1);
+        X = ones(M(numel(M)),Nx); Y = ones(M(numel(M)),1);
         door = true;
 
 

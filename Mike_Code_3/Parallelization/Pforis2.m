@@ -1,3 +1,4 @@
+                
 %%%ForIs2.m
 %% Forward ising
 %% 01.06.20 Trying to rebuild this from scratch to streamline our parameter input and review process
@@ -38,24 +39,25 @@ jn = 1; %| number of Trials
 % Tvec = [1e2];   
 % betavec = [0.1];
 
-Nvec = [10,20,30];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
+Nvec = [30];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
 
-Tvec = [1e3,1e4];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
+Tvec = [1e3];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
 
-betavec = [0.3,0.4]; 			%betavec = [0.4,0.9,1.4];
+betavec = [0.1]; 			%betavec = [0.4,0.9,1.4];
 
 sprsvec = [0];						% I need to convert this to a vector as well
 
 h_on = 1; 							%% h field genereation
 
-topovec = {1,3,4,5,6};		%topologies = {'sk',1,2,3,4,5,6}	%set sk to 0 if you don't want to use it(for now) % make topology the outer looop in the future
+topovec = {5};		%topologies = {'sk',1,2,3,4,5,6}	%set sk to 0 if you don't want to use it(for now) % make topology the outer looop in the future
                         % if first place is not occupied the ADJSET gets fucked up causing problems further down
 
 
-jta = 1;                % Random name. Our measure of how many trials are run so far
-jtatot = length(sprsvec)*length(betavec)*length(Tvec)*length(Nvec)*length(topovec)*jn
+% jta = 1;                % Random name. Our measure of how many trials are run so far
+% jtatot = length(sprsvec)*length(betavec)*length(Tvec)*length(Nvec)*length(topovec)*jn
 
-runs = 1;   % for indexing the trials ran for sprs, beta, T , N
+% runs = 1;   % for indexing the trials ran for sprs, beta, T , N, doesn't
+% work when parallelized
     
 
 
@@ -73,9 +75,10 @@ OverStruct.h_on 	   = h_on ;
 OverStruct.topdir 	 = topdir ;
 OverStruct.time 	   = time ;
 
+%spmd 
 for  Si = 1:length(sprsvec)
  
-    sprs = sprsvec(Si);
+    
 
     AllStruct = struct;
 
@@ -91,16 +94,18 @@ for  Si = 1:length(sprsvec)
                
         for Ti = 1:length(Tvec)
             
-            T = Tvec(Ti);
-            
+                       
             for Ni = 1:length(Nvec)
                 
+                beta = betavec(Bi);
+                T = Tvec(Ti);
+                sprs = sprsvec(Si);
                 N = Nvec(Ni);
                 
                 %name = ['N',num2str(N),'T1E',num2str(log10(T))];
                 name = ['St',num2str(Si),'Bt',num2str(Bi),'N',num2str(N),'T1E',num2str(log10(T))];
-                
-                
+                %namelist = [namelist, name]
+
                 %lowdir = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12)];
                 lowdir = [time(1:5),'parameters_',name,'_',time(6:12)];
 
@@ -118,12 +123,19 @@ for  Si = 1:length(sprsvec)
                 AllStruct.(name).topology = topovec;
 
                 %AllStruct() = {};
-                AllStruct.list(runs).name = name;
-                AllStruct.list(runs).T = T;
-                AllStruct.list(runs).N = N;
-                AllStruct.list(runs).beta = beta;
-                AllStruct.list(runs).sprsvec = sprsvec;
-                AllStruct.list(runs).topology = topovec;
+                AllStruct.list.name = name;
+                AllStruct.list.T = T;
+                AllStruct.list.N = N;
+                AllStruct.list.beta = beta;
+                AllStruct.list.sprsvec = sprsvec;
+                AllStruct.list.topology = topovec;
+
+                %AllStruct.list(runs).name = name;
+                %AllStruct.list(runs).T = T;
+                %AllStruct.list(runs).N = N;
+                %AllStruct.list(runs).beta = beta;
+                %AllStruct.list(runs).sprsvec = sprsvec;
+                %AllStruct.list(runs).topology = topovec;
                 
                 
                 
@@ -166,7 +178,7 @@ for  Si = 1:length(sprsvec)
                 %	 	topology = 5;  	%---Erdos Reyni random graph
                 % 		topology = 6;  	%--- Star network
                 %       Add +1 if you include other topologies from above
-                c = 2; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
+                c = 3; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
                 couplings = 1;	        %---Gaussian
                 %couplings = 2;     	%---Delta Function
                 % 		couplings = 3;	%---Double Delta Function. on average have the same amount of +/-1 values and will make sure all the same weight values
@@ -204,13 +216,19 @@ for  Si = 1:length(sprsvec)
                 AllStruct.(name).couplings = couplings;
                 AllStruct.(name).c = c;
 
-                AllStruct.list(runs).topology = topovec; % starting to duplicate data everywhere
-                AllStruct.list(runs).Jcontru = Adjset;
-                AllStruct.list(runs).Jtru = Jtoposet;
-                AllStruct.list(runs).htru = JHnorm.Htopo;
-                AllStruct.list(runs).couplings = couplings;
-                AllStruct.list(runs).c = c;
+                AllStruct.list.topology = topovec; % starting to duplicate data everywhere
+                AllStruct.list.Jcontru = Adjset;
+                AllStruct.list.Jtru = Jtoposet;
+                AllStruct.list.htru = JHnorm.Htopo;
+                AllStruct.list.couplings = couplings;
+                AllStruct.list.c = c;
 
+                %AllStruct.list(runs).topology = topovec; % starting to duplicate data everywhere
+                %AllStruct.list(runs).Jcontru = Adjset;
+                %AllStruct.list(runs).Jtru = Jtoposet;
+                %AllStruct.list(runs).htru = JHnorm.Htopo;
+                %AllStruct.list(runs).couplings = couplings;
+                %AllStruct.list(runs).c = c;
 
 
                 
@@ -227,7 +245,8 @@ for  Si = 1:length(sprsvec)
                 
                 % AllStruct.(name).S = SstructNorm.S_hat; %  %| Adding a fucking ' here so sublime doesn'tlose it's shit %Removed the transpose so it might not work with regular sanity checks, fix that down the line
                 AllStruct.(name).S = SstructNorm; % for working over multiple topologies and multiple output S
-                AllStruct.list(runs).S = SstructNorm;
+                AllStruct.list.S = SstructNorm;
+                %AllStruct.list(runs).S = SstructNorm;
                 %% Sanity check spike trains
                 %SstructDisc =  Met_Hast_Disc(T,N,jn,JHdiscon,sprs,time,lowdir,beta);
                 %SstructDimer = Met_Hast_D(T,N,jn,JHdimer,sprs,time,lowdir,beta);
@@ -265,10 +284,7 @@ for  Si = 1:length(sprsvec)
                 % no actually put it in it's own conatiner
                 disp('bllh2')
                 tic
-                %[LLH, jta] =
-                %BLLH2(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,jta,jtatot);
-                %%Regular bllh, testing PBLLH rn
-                [LLH, jta] = PBLLH(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,jta,jtatot);
+                LLH = PBLLH(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset);
                 toc
                 
                 %Testing Ncolas original code to see if I somehow fucked
@@ -281,10 +297,11 @@ for  Si = 1:length(sprsvec)
 %                 toc
                 
                 AllStruct.(name).BLLH = LLH;
-                AllStruct.list(runs).BLLH = LLH;
+                AllStruct.list.BLLH = LLH;
+                %AllStruct.list(runs).BLLH = LLH;
                 %AllStruct.(name).BLLHold = LLHold;
                 %AllStruct.(name).avgconerr = mean([LLH.totconerr]); %vestigial since made individual errors for each penalty method
-             runs = runs + 1;   
+             %runs = runs + 1;   
                 
             end
             
@@ -319,9 +336,9 @@ for  Si = 1:length(sprsvec)
     OverStruct(Si).AllStruct = AllStruct;
     
 end    
+%end
 
-
-    Jstor = modelgraphs2(OverStruct,sprsvec,betavec,Nvec,Tvec,topovec);
+    %Jstor = modelgraphs2(OverStruct,sprsvec,betavec,Nvec,Tvec,topovec);
     OverStruct(1).Jstor = Jstor;
     %modelgraphs3(Jstor,sprsvec,betavec,Nvec,Tvec,topologies);
     %Jstor2 = modelgraphs4(Jstor,sprsvec,betavec,Nvec,Tvec,topologies);

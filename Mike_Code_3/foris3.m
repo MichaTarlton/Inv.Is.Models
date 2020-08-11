@@ -21,9 +21,9 @@
 %	theta: 	coupling strength range
 
 
-
 clear all;
 %cd(cd)
+%cd('/home/michaeta/Documents/MATLAB/Mike_Code_3.1');
 cd('E:\GitHub\Inv.Is.Models\Mike_Code_3');  %Changes the working directory to where you want to store your output
 time = datestr(now,'HHMM-ddmmmyy');
 mkdir(cd,time);
@@ -38,22 +38,27 @@ jn = 1; %| number of Trials
 % Tvec = [1e2];   
 % betavec = [0.1];
 
-Nvec = [10,20,30];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
+Nvec = [10];					%Nvec = [50,100,150]; %Nvec = [50,100,300]; % Nvec = [100,200,300,400,500];
 
-Tvec = [1e3,1e4];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
+Tvec = [1e2];					%Tvec = [1e3,1e4,1e5]; % Tvec = [1e3,1e4,1e5,1e6]; %| originally preset to be a multiple of the node number:T.calculation: 3*M(numel(M))
 
-betavec = [0.3,0.4]; 			%betavec = [0.4,0.9,1.4];
+betavec = [0.1]; 			%betavec = [0.4,0.9,1.4];
 
 sprsvec = [0];						% I need to convert this to a vector as well
+sprs = 0; % only here as temp measure
+
+%coordvec = [1,2,4,8,12,16];                      % Coordination number, what I'm doing here is replacing the previous sparsity measure. This might break some stuff
+coordvec = [16];
 
 h_on = 1; 							%% h field genereation
 
+%topovec = {1};
 topovec = {1,3,4,5,6};		%topologies = {'sk',1,2,3,4,5,6}	%set sk to 0 if you don't want to use it(for now) % make topology the outer looop in the future
                         % if first place is not occupied the ADJSET gets fucked up causing problems further down
 
 
 jta = 1;                % Random name. Our measure of how many trials are run so far
-jtatot = length(sprsvec)*length(betavec)*length(Tvec)*length(Nvec)*length(topovec)*jn
+jtatot = length(coordvec)*length(betavec)*length(Tvec)*length(Nvec)*length(topovec)*jn
 
 runs = 1;   % for indexing the trials ran for sprs, beta, T , N
     
@@ -73,9 +78,11 @@ OverStruct.h_on 	   = h_on ;
 OverStruct.topdir 	 = topdir ;
 OverStruct.time 	   = time ;
 
-for  Si = 1:length(sprsvec)
+%for  Si = 1:length(sprsvec)
+for  Ci = 1:length(coordvec)
  
-    sprs = sprsvec(Si);
+    %sprs = sprsvec(Si);
+    c = coordvec(Ci);
 
     AllStruct = struct;
 
@@ -98,7 +105,8 @@ for  Si = 1:length(sprsvec)
                 N = Nvec(Ni);
                 
                 %name = ['N',num2str(N),'T1E',num2str(log10(T))];
-                name = ['St',num2str(Si),'Bt',num2str(Bi),'N',num2str(N),'T1E',num2str(log10(T))];
+                %name = ['St',num2str(Si),'Bt',num2str(Bi),'N',num2str(N),'T1E',num2str(log10(T))];
+                name = ['St',num2str(Ci),'Bt',num2str(Bi),'N',num2str(N),'T1E',num2str(log10(T))]; % have to keep in St for now even though it reps the coord no
                 
                 
                 %lowdir = [time(1:5),'parameters_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_beta',num2str(beta),'_',time(6:12)];
@@ -115,6 +123,7 @@ for  Si = 1:length(sprsvec)
                 AllStruct.(name).N = N;
                 AllStruct.(name).beta = beta;
                 AllStruct.(name).sprsvec = sprsvec;
+                 AllStruct.(name).coordvec = coordvec;
                 AllStruct.(name).topology = topovec;
 
                 %AllStruct() = {};
@@ -123,6 +132,7 @@ for  Si = 1:length(sprsvec)
                 AllStruct.list(runs).N = N;
                 AllStruct.list(runs).beta = beta;
                 AllStruct.list(runs).sprsvec = sprsvec;
+                AllStruct.list(runs).coordvec = coordvec;
                 AllStruct.list(runs).topology = topovec;
                 
                 
@@ -166,7 +176,8 @@ for  Si = 1:length(sprsvec)
                 %	 	topology = 5;  	%---Erdos Reyni random graph
                 % 		topology = 6;  	%--- Star network
                 %       Add +1 if you include other topologies from above
-                c = 2; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
+                %c = 2; 		  		%--- Coordination Number: Average number of conenctions each node has. c = 2,3,4,6,8 . How many children each node generates.
+                % c is defined above as part of vector
                 couplings = 1;	        %---Gaussian
                 %couplings = 2;     	%---Delta Function
                 % 		couplings = 3;	%---Double Delta Function. on average have the same amount of +/-1 values and will make sure all the same weight values
@@ -268,7 +279,7 @@ for  Si = 1:length(sprsvec)
                 %[LLH, jta] =
                 %BLLH2(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,jta,jtatot);
                 %%Regular bllh, testing PBLLH rn
-                [LLH, jta] = PBLLH(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,jta,jtatot);
+                [LLH, jta] = PBLLH(T,N,beta,sprs,h_on,AllStruct.(name).S,Adjset,Jtoposet,jta,jtatot);
                 toc
                 
                 %Testing Ncolas original code to see if I somehow fucked
@@ -311,12 +322,14 @@ for  Si = 1:length(sprsvec)
             
         end
         
-        save([cd,'\',time(1:5),'AllStruct_sprs',num2str(sprs),'_beta',num2str(beta),'_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
+        %save([cd,'\',time(1:5),'AllStruct_sprs',num2str(sprs),'_beta',num2str(beta),'_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
+        save([cd,'\',time(1:5),'AllStruct_C',num2str(c),'_beta',num2str(beta),'_N',num2str(N),'_T1E',num2str(log10(T)),'_trials',num2str(jn),'_',time(6:12),'.mat'],'AllStruct','-v7.3');
     end
     
 
     %Jstor = JGraphs4(AllStruct,time,beta,topdir,betadir,Tvec,Nvec);
-    OverStruct(Si).AllStruct = AllStruct;
+    %OverStruct(Si).AllStruct = AllStruct;
+    OverStruct(Ci).AllStruct = AllStruct;
     
 end    
 

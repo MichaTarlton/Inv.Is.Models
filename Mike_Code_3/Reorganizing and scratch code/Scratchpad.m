@@ -31,3 +31,8 @@ MDLcount
                     [es, Jstor(topology).Topo(bt).beta(Nt).N(Tt).T(sprs).Spars.(model).fpconerr]
                     [es, Jstor(topology).Topo(bt).beta(Nt).N(Tt).T(sprs).Spars.(model).fnconerr]
                     [es, Jstor(topology).Topo(bt).beta(Nt).N(Tt).T(sprs).Spars.(model).totconerr]
+
+[BIC,AIC,MDLl,MDLu,MDLent,MDLcount]
+
+
+max([BICespc,AICespc,MDLlespc,MDLuespc,MDLentespc,MDLcountespc])

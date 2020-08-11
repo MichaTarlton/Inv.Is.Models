@@ -1,0 +1,42 @@
+
+function multiallstruct = addsymm(multiallstruct)
+
+models = [{'BIC'     },{'AIC'     },{'MDLl'    },{'MDLu'    },{'MDLent'  },{'MDLcount'}];
+topologies = [1,2,3,4,5,6];
+
+
+for i = 1:length(multiallstruct)
+
+	Jtru = multiallstruct(i).Jcontru{topology};
+
+	for t =1:length(topologies)	%topology should only be 5 since we are skipping the topo=2 atm
+	
+		for m =1:length(models)	
+
+
+		
+
+		
+		
+			Jtru = multiallstruct(i).Jcontru{t};
+			
+			Jrecon 	=	multiallstruct(i).BLLH(t).Jrecon.(modelname)  ;
+			
+			Jsymrecon =	multiallstruct(i).BLLH(t).Jsymcon.(modelname);
+			
+			%% For making the avg symmetry Jrecon
+			avgcon = (triu(Jsymrecon) + tril(Jsymrecon)')/2;
+			Javgsymrecon = avgcon + avgcon';
+			
+			multiallstruct(i).BLLH(t).Javgsymrecon.(modelname) = Javgsymrecon
+
+
+			multiallstruct(i).BLLH(t).Jrrerr.(modelname) 		=sqrt(sum((Jrecon 		- Jtru).^2 / sum(Jtru.^2)));
+			multiallstruct(i).BLLH(t).Jsymrrerr.(modelname) 	=sqrt(sum((Jsymecon 		- Jtru).^2 / sum(Jtru.^2)));
+			multiallstruct(i).BLLH(t).Javgsymrrerr.(modelname) =sqrt(sum((Javgsymrecon 	- Jtru).^2 / sum(Jtru.^2)));
+			
+		
+		
+end	
+end
+end
