@@ -1,4 +1,6 @@
 # Novel Model Slection Criterion for Inference of Ising Models
+Author - Michael Tarlton
+Supervisors - Yasser Roudi & Nicola Bulso
 ## Directory:
 1. fi0201.m
 	- Primary script for the full forwad Ising and inference problem
