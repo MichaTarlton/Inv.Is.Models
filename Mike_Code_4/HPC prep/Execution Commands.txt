@@ -1,0 +1,40 @@
+%%% To run the job
+chmod u+x jobB1.slurm
+chmod u+x jobB2.slurm
+chmod u+x jobB3.slurm
+chmod u+x jobB4.slurm
+chmod u+x jobB5.slurm
+chmod u+x jobB6.slurm
+chmod u+x jobB7.slurm
+chmod u+x jobB8.slurm
+chmod u+x jobB9.slurm
+chmod u+x jobB10.slurm
+chmod u+x jobB11.slurm
+chmod u+x jobB12.slurm
+chmod u+x jobB13.slurm
+chmod u+x jobB14.slurm
+
+
+
+sbatch jobB1.slurm
+sbatch jobB2.slurm
+sbatch jobB3.slurm
+sbatch jobB4.slurm
+sbatch jobB5.slurm
+sbatch jobB6.slurm
+sbatch jobB7.slurm
+sbatch jobB8.slurm
+sbatch jobB9.slurm
+sbatch jobB10.slurm
+sbatch jobB11.slurm
+sbatch jobB12.slurm
+sbatch jobB13.slurm
+sbatch jobB14.slurm
+
+
+
+scancel 902787
+scancel 902788
+scancel 902789
+scancel 902790
+scancel 902791
